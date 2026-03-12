@@ -125,7 +125,6 @@ export default {
       activeBuildingKey: 'taihe', // 默认选中太和殿
       activePartIndex: 0,         // 默认选中第一个部位（比如屋顶）
 
-      // 2. 超级数据库：包含了三个建筑的所有文字和颜色信息！
       buildingsData: {
         taihe: {
           name: '太和殿',

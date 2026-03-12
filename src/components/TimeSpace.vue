@@ -143,7 +143,7 @@ import * as echarts from 'echarts';
 export default {
   name: 'TimeSpace',
   
-  // 1. Vue 的记忆中枢：存储当前的状态和所有文字
+
   data() {
     return {
       colorLevels: [
@@ -427,7 +427,6 @@ export default {
   min-height: 100vh;
 }
 
-/* ================= 布局魔法：让抽屉排好队 ================= */
 .top-dashboard {
   display: flex; /* 开启弹性盒子布局 */
   justify-content: space-between; /* 让左中右三个栏目均匀分布 */
@@ -443,7 +442,7 @@ export default {
 /* ================= 通用的卡片衣服 ================= */
 .card {
   background-color: #ffffff; /* 纯白背景 */
-  border-radius: 12px; /* 圆角，让界面看起来更柔和现代化 */
+  border-radius: 12px; 
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* 淡淡的阴影，让卡片浮起来 */
   border: 1px solid #ebeef5; /* 极细的边框 */
@@ -550,7 +549,7 @@ export default {
   height: 100%;
   color: #999;
   background-color: #f9f9f9;
-  border: 2px dashed #ddd; /* 虚线框，表示这里还在施工 */
+  border: 2px dashed #ddd; 
   border-radius: 8px;
   text-align: center;
   padding: 20px;

@@ -47,28 +47,27 @@
 <script>
 // 从 components 文件夹里把刚才建好的组件引进来
 import TimeSpace from './components/TimeSpace.vue'
-import SpecialCase from './components/SpecialCase.vue' // 👈 新增这一行
+import SpecialCase from './components/SpecialCase.vue' 
 import UserExp from './components/UserExp.vue';
 export default {
   name: 'App',
   components: {
-    TimeSpace ,// 告诉 Vue，我要用这个零件了
+    TimeSpace ,
     SpecialCase,
     UserExp
   },
-  // data() 就是 Vue 的“大脑记忆区”，用来存变量
+
   data() {
     return {
-      activeTab: '时空分析' // 默认一开始选中“时空分析”
+      activeTab: '时空分析' 
     }
   },
-  // methods 就是 Vue 能执行的“动作/方法”
+  
   methods: {
     changeTabAndScroll(tabName) {
-      // 1. 改变当前选中的标签
+
       this.activeTab = tabName;
       
-      // 2. 找到第二页的那个盒子，命令浏览器平滑滚动过去！
       document.getElementById('content-area').scrollIntoView({ 
         behavior: 'smooth' 
       });
@@ -78,7 +77,6 @@ export default {
 </script>
 
 <style>
-/* ... 这里保留之前第一步给你的所有 style CSS 代码，一字不差地放在这里 ... */
 body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
 .hero-section { width: 100vw; height: 100vh; background: linear-gradient(to right, #ff5e00, #ffb347); position: relative; }
 .vertical-title { position: absolute; left: 5%; top: 10%; color: white; font-size: 60px; font-weight: bold; writing-mode: vertical-lr; letter-spacing: 20px; text-shadow: 2px 4px 10px rgba(0,0,0,0.3); }
@@ -90,9 +88,9 @@ body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
 .tab-btn.active { background-color: white; color: #ff5e00; }
 .tab-btn:hover { background-color: rgba(255, 255, 255, 0.4); }
 
-/* 下面是新增的第二大页的样式 */
+/* 第二大页 */
 .content-section {
-  min-height: 100vh; /* 保证第二页至少有屏幕那么高 */
+  min-height: 100vh; 
   background-color: #f0f2f5;
 }
 .placeholder {

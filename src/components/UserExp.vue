@@ -164,7 +164,7 @@ export default {
       ],
       currentRole: null, // 马上在 created 里初始化
 
-      // --- 数据库 3：定义建筑的各个部位 (演示用5个，以后你可以在这加到27个) ---
+      // --- 数据库 3：定义建筑的各个部位  ---
       partsData: {
         'roof': { name: '屋顶', currentColor: null },
         'wall': { name: '主墙体', currentColor: null },
@@ -172,24 +172,21 @@ export default {
         'doorRight': { name: '右门扇', currentColor: null },
         'base': { name: '台基', currentColor: null }
       },
-      totalParts: 27, // 根据你的需求，虽然我们只画了5个，但进度条按27个算
+      totalParts: 27, 
 
-      // --- 弹窗控制状态 ---
+    
       showModal: false,
-      activePartId: null // 记录现在点开了哪个部位
+      activePartId: null 
     }
   },
   created() {
-    // 页面一加载，默认你是尊贵的皇帝！
-    this.currentRole = this.roles[0];
+   this.currentRole = this.roles[0];
   },
   computed: {
-    // 自动计算：有哪些颜色是当前身份被禁用的？
     forbiddenColors() {
       const allColorIds = Object.keys(this.allColors);
       return allColorIds.filter(id => !this.currentRole.allowedColors.includes(id));
     },
-    // 自动计算：当前已经上了多少个颜色？
     coloredCount() {
       let count = 0;
       for (const key in this.partsData) {
@@ -197,7 +194,7 @@ export default {
       }
       return count;
     },
-    // 自动计算：进度条百分比
+    
     progressPercent() {
       return (this.coloredCount / this.totalParts) * 100;
     }
@@ -253,7 +250,7 @@ export default {
 .svg-container { width: 100%; max-width: 600px; border: 1px solid #ebeef5; border-radius: 8px; background: white; margin-bottom: 20px; overflow: hidden; }
 .interactive-svg { width: 100%; height: auto; display: block; }
 
-/* 魔法：鼠标悬停在建筑部位上时，会出现半透明的橙色高亮和手型鼠标！ */
+
 .clickable-part { transition: all 0.3s; cursor: pointer; }
 .clickable-part:hover { fill: rgba(255, 94, 0, 0.2) !important; stroke: #ff5e00; }
 
