@@ -40,4 +40,30 @@ const count = ref(0)
 .read-the-docs {
   color: #888;
 }
+/* 手机端专用样式 */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+    flex-direction: column; /* 如果你用了 flex，让它们上下排列 */
+  }
+
+  /* 针对你截图中重叠的文字 */
+  .title-vertical {
+    font-size: 2rem; /* 缩小那个巨大的垂直标题 */
+    margin-bottom: 10px;
+  }
+
+  .subtitle-horizontal {
+    position: static; /* 取消绝对定位，让它乖乖排在下面，不再重叠 */
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .button-group {
+    display: flex;
+    flex-wrap: wrap; /* 让按钮在空间不够时自动换行 */
+    justify-content: center;
+    gap: 10px;
+  }
+}
 </style>

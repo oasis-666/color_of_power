@@ -621,4 +621,24 @@ export default {
 /* 底部状态 */
 .current-status { text-align: center; font-size: 16px; letter-spacing: 1px; }
 .current-status span { font-size: 18px; margin-left: 5px; transition: color 0.3s; }
+@media (max-width: 768px) {
+  .top-dashboard {
+    flex-direction: column !important; /* 左中右三列变一列 */
+  }
+
+  .left-column, .center-column, .right-column {
+    width: 100% !important; /* 每一栏都占满宽度 */
+  }
+
+  .timeline-track {
+    overflow-x: auto; /* 时间轴太长了，允许横向滑动 */
+    justify-content: flex-start !important;
+    padding-bottom: 20px;
+  }
+
+  .dynasty-node {
+    flex-shrink: 0; /* 防止时间轴节点被挤扁 */
+    width: 100px !important;
+  }
+}
 </style>

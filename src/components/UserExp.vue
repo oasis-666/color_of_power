@@ -277,4 +277,22 @@ export default {
 .card-info { text-align: center; display: flex; flex-direction: column; }
 .card-info strong { font-size: 14px; color: #333; }
 .card-info span { font-size: 12px; color: #666; margin-top: 4px; }
+@media (max-width: 768px) {
+  .identity-tabs {
+    flex-wrap: wrap; /* 身份按钮空间不够就换行 */
+  }
+
+  .identity-tabs button {
+    min-width: 100px;
+  }
+
+  .color-palette {
+    flex-wrap: wrap;
+    gap: 10px !important;
+  }
+
+  .modal-color-grid {
+    grid-template-columns: 1fr 1fr !important; /* 弹窗里的颜色变两列 */
+  }
+}
 </style>

@@ -100,4 +100,40 @@ body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
   align-items: center;
   color: #999;
 }
+@media (max-width: 768px) {
+  .hero-section {
+    display: flex;
+    flex-direction: column; /* 垂直排队 */
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    height: auto; /* 手机端让内容撑开高度 */
+    min-height: 100vh;
+  }
+
+  .vertical-title {
+    position: static !important; /* 取消绝对定位 */
+    writing-mode: horizontal-tb !important; /* 垂直字变横向字 */
+    font-size: 40px !important;
+    letter-spacing: 5px !important;
+    margin-bottom: 20px;
+  }
+
+  .center-content {
+    position: static !important; /* 取消绝对定位 */
+    margin-bottom: 40px;
+  }
+
+  .bottom-tabs {
+    position: static !important; /* 取消绝对定位 */
+    flex-wrap: wrap; /* 按钮多时自动换行 */
+    gap: 10px !important;
+  }
+
+  .tab-btn {
+    padding: 10px 15px !important;
+    font-size: 14px !important;
+    width: 80%; /* 按钮占宽一点好点 */
+  }
+}
 </style>

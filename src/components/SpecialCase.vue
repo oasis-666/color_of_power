@@ -245,4 +245,52 @@ export default {
 .detail-content { display: flex; gap: 40px; font-size: 14px; color: #555; margin-bottom: 15px; }
 .detail-colors { display: flex; gap: 20px; }
 .color-pill { display: flex; align-items: center; gap: 8px; background: white; padding: 5px 15px; border-radius: 20px; border: 1px solid #ddd; font-size: 14px; }
+/* 手机端专用样式 */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+    flex-direction: column; /* 如果你用了 flex，让它们上下排列 */
+  }
+
+  /* 针对你截图中重叠的文字 */
+  .title-vertical {
+    font-size: 2rem; /* 缩小那个巨大的垂直标题 */
+    margin-bottom: 10px;
+  }
+
+  .subtitle-horizontal {
+    position: static; /* 取消绝对定位，让它乖乖排在下面，不再重叠 */
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .button-group {
+    display: flex;
+    flex-wrap: wrap; /* 让按钮在空间不够时自动换行 */
+    justify-content: center;
+    gap: 10px;
+  }
+}
+@media (max-width: 768px) {
+  .content-layout {
+    flex-direction: column !important; /* 三列信息变垂直排列 */
+  }
+
+  .building-tabs {
+    flex-wrap: wrap;
+  }
+
+  .building-tabs button {
+    padding: 8px 15px !important;
+    font-size: 14px !important;
+  }
+
+  .mini-summary-box {
+    width: 90% !important; /* 解释框占满 */
+  }
+
+  .part-tabs {
+    flex-wrap: wrap; /* 底部部位选择器自动换行 */
+  }
+}
 </style>
