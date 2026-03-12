@@ -246,7 +246,8 @@ export default {
       this.mapChart = echarts.init(chartDom);
       this.mapChart.showLoading({ text: '正在召唤中国版图...' });
       try {
-        const response = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
+        // 注意：路徑必須以 / 開頭，代表從網站根目錄（即 public 資料夾）開始尋找
+        const response = await fetch('/chinamap.json');
         const geoJson = await response.json();
         this.mapChart.hideLoading();
         echarts.registerMap('china', geoJson);
