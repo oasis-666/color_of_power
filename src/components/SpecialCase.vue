@@ -42,8 +42,12 @@
         <h3 class="card-title">{{ currentBuilding.name }}</h3>
         
         <div class="sketch-box">
-          <div class="placeholder-img">此处放置 {{ currentBuilding.name }} 的线稿图</div>
-        </div>
+  <img 
+    :src="buildingsData[activeBuildingKey].image" 
+    :alt="buildingsData[activeBuildingKey].name" 
+    style="width: 90%; height: 90%; object-fit: contain;"
+  />
+</div>
 
         <div class="mini-summary-box">
           <div class="summary-title">{{ currentPart.name }}</div>
@@ -128,6 +132,7 @@ export default {
       buildingsData: {
         taihe: {
           name: '太和殿',
+          image: '/svg-buildings/taihedian.svg',
           level: '皇家最高等级宫殿', year: '明永乐十八年 (1420年)',
           colorFeatures: '黄色琉璃瓦顶，朱红墙体，金龙彩绘',
           ruleText: '该建筑的色彩使用需经皇帝批准，任何僭越使用将被视为谋逆之罪。',
@@ -138,20 +143,23 @@ export default {
             { name: '台基', requirement: '皇家专用', colors: [{ name: '白', fullName: '汉白玉', hex: '#ffffff' }] }
           ]
         },
-        foguang: {
-          name: '佛光寺东大殿',
-          level: '唐代木构建筑珍品', year: '唐大中十一年 (857年)',
-          colorFeatures: '青灰瓦顶，经特许使用彩绘斗拱',
-          ruleText: '该建筑的色彩使用需经皇帝批准，任何僭越使用将被视为谋逆之罪。',
-          parts: [
-            { name: '屋顶', requirement: '寺庙建筑', colors: [{ name: '青', fullName: '青色瓦片', hex: '#3169b2' }, { name: '灰', fullName: '灰黑瓦片', hex: '#666666' }] },
-            { name: '斗拱', requirement: '经皇帝恩准', colors: [{ name: '红', fullName: '朱红漆', hex: '#ff5e00' }, { name: '黄', fullName: '黄色点缀', hex: '#ffbb00' }] },
-            { name: '墙体', requirement: '寺庙建筑', colors: [{ name: '灰', fullName: '灰砖', hex: '#666666' }, { name: '白', fullName: '白墙', hex: '#ffffff' }] },
-            { name: '门', requirement: '寺庙建筑', colors: [{ name: '红', fullName: '红漆', hex: '#ff5e00' }, { name: '黑', fullName: '黑漆', hex: '#333333' }] }
-          ]
-        },
+        zongdushu: {
+        name: '直隶总督署',
+        image: '/svg-buildings/zongdushu.svg', // 🌟 新增：绑定总督署的 SVG
+        level: '清代最高级别地方军政长官衙署',
+        year: '清雍正八年 (1730年)',
+        colorFeatures: '布瓦小式硬山，青砖建成，黑漆立柱',
+        ruleText: '严格按照清朝关于省级衙署的规制修建，色彩古朴大方、威严凝重，体现“政肃风清”的官府作风。',
+        parts: [
+          { name: '屋顶', requirement: '小式硬山顶', colors: [{ name: '灰', fullName: '布瓦灰顶', hex: '#5c6068' }] },
+          { name: '墙体', requirement: '省级衙署规制', colors: [{ name: '青', fullName: '青砖墙体', hex: '#6b777d' }] },
+          { name: '立柱', requirement: '严禁使用朱红', colors: [{ name: '黑', fullName: '黑漆柱子', hex: '#1a1a1a' }] },
+          { name: '大门', requirement: '威慑镇抚', colors: [{ name: '黑', fullName: '黑色大门', hex: '#111111' }] }
+        ]
+      },
         tiantan: {
           name: '天坛祈年殿',
+          image: '/svg-buildings/tiantan.svg',
           level: '皇家祭祀建筑', year: '明永乐十八年 (1420年)',
           colorFeatures: '三层屋顶，上二层黄色，下层蓝色象征天',
           ruleText: '该建筑的色彩使用需经皇帝批准，任何僭越使用将被视为谋逆之罪。',
@@ -209,6 +217,7 @@ export default {
 .rule-box { border-left: 4px solid #ff5e00; padding-left: 15px; margin-top: 30px; background: #fff8f5; padding: 15px; border-radius: 0 8px 8px 0; }
 .rule-title { color: #d32f2f; font-weight: bold; font-size: 14px; margin-bottom: 5px; }
 .rule-text { font-size: 13px; color: #666; line-height: 1.6; }
+
 
 /* 中间简笔画 */
 .sketch-box { width: 100%; height: 300px; border: 2px dashed #ddd; border-radius: 8px; display: flex; justify-content: center; align-items: center; background: #fafafa; margin-bottom: 20px; }

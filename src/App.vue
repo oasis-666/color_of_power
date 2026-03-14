@@ -13,19 +13,26 @@
           :class="['tab-btn', { active: activeTab === '时空分析' }]" 
           @click="changeTabAndScroll('时空分析')"
         >
-          地图 时空分析
+          🗺️ 时空分析
         </button>
         <button 
           :class="['tab-btn', { active: activeTab === '特例分析' }]" 
           @click="changeTabAndScroll('特例分析')"
         >
-          建筑 特例分析
+          🏠 特例分析
         </button>
         <button 
           :class="['tab-btn', { active: activeTab === '用户体验' }]" 
           @click="changeTabAndScroll('用户体验')"
         >
-          调色板 用户体验
+          🎨 用户体验
+        </button>
+        
+        <button 
+          :class="['tab-btn', { active: activeTab === 'AI智能识图' }]" 
+          @click="changeTabAndScroll('AI智能识图')"
+        >
+          🤖 AI 智能识图
         </button>
       </div>
     </div>
@@ -38,36 +45,37 @@
 
       <UserExp v-if="activeTab === '用户体验'" />
 
-    
+      <ImageAnalyzer v-if="activeTab === 'AI智能识图'" />
 
     </div>
   </div>
 </template>
 
 <script>
-// 从 components 文件夹里把刚才建好的组件引进来
 import TimeSpace from './components/TimeSpace.vue'
 import SpecialCase from './components/SpecialCase.vue' 
 import UserExp from './components/UserExp.vue';
+import ImageAnalyzer from './components/ImageAnalyzer.vue'
+
 export default {
   name: 'App',
   components: {
-    TimeSpace ,
+    TimeSpace,
     SpecialCase,
-    UserExp
+    UserExp,
+    ImageAnalyzer
   },
 
   data() {
     return {
-      activeTab: '时空分析' 
+      activeTab: '时空分析' // 默认显示第一页
     }
   },
   
   methods: {
     changeTabAndScroll(tabName) {
-
       this.activeTab = tabName;
-      
+      // 点击后丝滑滚动到下方内容区
       document.getElementById('content-area').scrollIntoView({ 
         behavior: 'smooth' 
       });
@@ -77,6 +85,7 @@ export default {
 </script>
 
 <style>
+/* 样式部分保持原样，无需修改 */
 body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
 .hero-section { width: 100vw; height: 100vh; background: linear-gradient(to right, #ff5e00, #ffb347); position: relative; }
 .vertical-title { position: absolute; left: 5%; top: 10%; color: white; font-size: 60px; font-weight: bold; writing-mode: vertical-lr; letter-spacing: 20px; text-shadow: 2px 4px 10px rgba(0,0,0,0.3); }
@@ -88,52 +97,45 @@ body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
 .tab-btn.active { background-color: white; color: #ff5e00; }
 .tab-btn:hover { background-color: rgba(255, 255, 255, 0.4); }
 
-/* 第二大页 */
 .content-section {
   min-height: 100vh; 
   background-color: #f0f2f5;
 }
-.placeholder {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #999;
-}
+
 @media (max-width: 768px) {
   .hero-section {
     display: flex;
-    flex-direction: column; /* 垂直排队 */
+    flex-direction: column; 
     justify-content: center;
     align-items: center;
     padding: 20px;
-    height: auto; /* 手机端让内容撑开高度 */
+    height: auto; 
     min-height: 100vh;
   }
 
   .vertical-title {
-    position: static !important; /* 取消绝对定位 */
-    writing-mode: horizontal-tb !important; /* 垂直字变横向字 */
+    position: static !important; 
+    writing-mode: horizontal-tb !important; 
     font-size: 40px !important;
     letter-spacing: 5px !important;
     margin-bottom: 20px;
   }
 
   .center-content {
-    position: static !important; /* 取消绝对定位 */
+    position: static !important; 
     margin-bottom: 40px;
   }
 
   .bottom-tabs {
-    position: static !important; /* 取消绝对定位 */
-    flex-wrap: wrap; /* 按钮多时自动换行 */
+    position: static !important; 
+    flex-wrap: wrap; 
     gap: 10px !important;
   }
 
   .tab-btn {
     padding: 10px 15px !important;
     font-size: 14px !important;
-    width: 80%; /* 按钮占宽一点好点 */
+    width: 80%; 
   }
 }
 </style>
