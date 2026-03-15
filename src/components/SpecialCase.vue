@@ -132,42 +132,45 @@ export default {
       buildingsData: {
         taihe: {
           name: '太和殿',
-          image: '/svg-buildings/taihedian.svg',
-          level: '皇家最高等级宫殿', year: '明永乐十八年 (1420年)',
-          colorFeatures: '黄色琉璃瓦顶，朱红墙体，金龙彩绘',
+          // 注意：这里换成了美工给的彩色图路径，请确保文件名和你存的一致
+          image: '/svg-buildings/taihedian.svg', 
+          level: '皇家最高等级宫殿', 
+          year: '明永乐十八年 (1420年)',
+          colorFeatures: '明黄屋顶，朱红墙柱，檐下青绿点缀',
           ruleText: '该建筑的色彩使用需经皇帝批准，任何僭越使用将被视为谋逆之罪。',
           parts: [
-            { name: '屋顶', requirement: '皇家专用', colors: [{ name: '黄', fullName: '黄色琉璃瓦', hex: '#ffbb00' }] },
-            { name: '墙体', requirement: '皇家专用', colors: [{ name: '红', fullName: '朱红墙体', hex: '#ff5e00' }] },
-            { name: '立柱', requirement: '皇家专用', colors: [{ name: '红', fullName: '朱红立柱', hex: '#ff5e00' }] },
-            { name: '台基', requirement: '皇家专用', colors: [{ name: '白', fullName: '汉白玉', hex: '#ffffff' }] }
+            { name: '屋顶', requirement: '皇家专用', colors: [{ name: '黄', fullName: '明黄琉璃瓦', hex: '#EBA53D' }] },
+            { name: '墙体立柱', requirement: '皇家专用', colors: [{ name: '红', fullName: '朱红墙柱', hex: '#982A22' }] },
+            { name: '檐下斗拱', requirement: '等级规制', colors: [{ name: '绿', fullName: '青绿彩画', hex: '#408D73' }] },
+            { name: '门窗台基', requirement: '皇家特许', colors: [{ name: '白', fullName: '米白门窗', hex: '#E4D29E' }] }
           ]
         },
         zongdushu: {
-        name: '直隶总督署',
-        image: '/svg-buildings/zongdushu.svg', // 🌟 新增：绑定总督署的 SVG
-        level: '清代最高级别地方军政长官衙署',
-        year: '清雍正八年 (1730年)',
-        colorFeatures: '布瓦小式硬山，青砖建成，黑漆立柱',
-        ruleText: '严格按照清朝关于省级衙署的规制修建，色彩古朴大方、威严凝重，体现“政肃风清”的官府作风。',
-        parts: [
-          { name: '屋顶', requirement: '小式硬山顶', colors: [{ name: '灰', fullName: '布瓦灰顶', hex: '#5c6068' }] },
-          { name: '墙体', requirement: '省级衙署规制', colors: [{ name: '青', fullName: '青砖墙体', hex: '#6b777d' }] },
-          { name: '立柱', requirement: '严禁使用朱红', colors: [{ name: '黑', fullName: '黑漆柱子', hex: '#1a1a1a' }] },
-          { name: '大门', requirement: '威慑镇抚', colors: [{ name: '黑', fullName: '黑色大门', hex: '#111111' }] }
-        ]
-      },
+          name: '直隶总督署',
+          image: '/svg-buildings/zongdushu.svg',
+          level: '清代最高级别地方军政长官衙署',
+          year: '清雍正八年 (1730年)',
+          colorFeatures: '青灰底色，深灰大门，两侧朱红明柱点缀',
+          ruleText: '地方高级官员建筑严格遵循《大清会典》，以青灰为主，严禁大面积使用黄、朱红等皇家色彩。',
+          parts: [
+            { name: '屋顶', requirement: '官员通用', colors: [{ name: '深灰', fullName: '深灰瓦片', hex: '#4D4D4D' }] },
+            { name: '建筑主体', requirement: '官员通用', colors: [{ name: '浅灰', fullName: '青灰石墙', hex: '#B3B3B3' }] },
+            { name: '大门', requirement: '规制要求', colors: [{ name: '黑灰', fullName: '深灰大门', hex: '#494949' }] },
+            { name: '两侧装饰', requirement: '点缀特许', colors: [{ name: '红', fullName: '朱红装饰', hex: '#E60000' }] }
+          ]
+        },
         tiantan: {
           name: '天坛祈年殿',
           image: '/svg-buildings/tiantan.svg',
-          level: '皇家祭祀建筑', year: '明永乐十八年 (1420年)',
-          colorFeatures: '三层屋顶，上二层黄色，下层蓝色象征天',
-          ruleText: '该建筑的色彩使用需经皇帝批准，任何僭越使用将被视为谋逆之罪。',
+          level: '皇家祭祀建筑', 
+          year: '明永乐十八年 (1420年)',
+          colorFeatures: '深蓝琉璃瓦，鎏金宝顶，朱红底座',
+          ruleText: '祭天建筑使用独特的蓝色琉璃瓦，象征“天”，这是超越普通皇宫黄瓦的特殊礼制色彩。',
           parts: [
-            { name: '顶层屋顶', requirement: '皇家祭祀', colors: [{ name: '黄', fullName: '黄色琉璃瓦', hex: '#ffbb00' }] },
-            { name: '中层屋顶', requirement: '皇家祭祀', colors: [{ name: '黄', fullName: '黄色琉璃瓦', hex: '#ffbb00' }] },
-            { name: '底层屋顶', requirement: '象征天空', colors: [{ name: '青', fullName: '蓝色琉璃瓦', hex: '#0088cc' }] },
-            { name: '朱红立柱', requirement: '皇家祭祀', colors: [{ name: '红', fullName: '朱红漆', hex: '#ff5e00' }] }
+            { name: '三层屋顶', requirement: '象征天空', colors: [{ name: '深蓝', fullName: '深蓝琉璃瓦', hex: '#202A5A' }] },
+            { name: '鎏金宝顶', requirement: '最高神权', colors: [{ name: '金', fullName: '鎏金宝顶', hex: '#E2B854' }] },
+            { name: '立柱底座', requirement: '皇家祭祀', colors: [{ name: '红', fullName: '朱红立柱', hex: '#9B2822' }] },
+            { name: '夹层点缀', requirement: '皇家祭祀', colors: [{ name: '浅绿', fullName: '浅绿额枋', hex: '#91B68F' }] }
           ]
         }
       }
@@ -220,8 +223,7 @@ export default {
 
 
 /* 中间简笔画 */
-.sketch-box { width: 100%; height: 300px; border: 2px dashed #ddd; border-radius: 8px; display: flex; justify-content: center; align-items: center; background: #fafafa; margin-bottom: 20px; }
-.placeholder-img { color: #999; font-size: 14px; }
+.sketch-box { width: 100%; height: 300px; border: none; border-radius: 12px; display: flex; justify-content: center; align-items: center; background: #ffffff; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); }.placeholder-img { color: #999; font-size: 14px; }
 .mini-summary-box { border: 2px solid #ff5e00; border-radius: 8px; padding: 15px 30px; text-align: center; background: white; width: 60%; }
 .summary-title { font-size: 18px; font-weight: bold; color: #ff5e00; margin-bottom: 5px; }
 .summary-desc { font-size: 13px; color: #666; margin-bottom: 15px; }

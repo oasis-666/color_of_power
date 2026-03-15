@@ -11,7 +11,7 @@
           @click="selectRole(role)"
         >
           <strong>{{ role.name }}</strong>
-          <span>可用{{ role.allowedColors.length }}种颜色</span>
+          <span>可用 {{ role.allowedColors.length }} 种颜色</span>
         </button>
       </div>
     </div>
@@ -28,67 +28,79 @@
 
     <div class="card canvas-section">
       <h3>建筑配色详图 - {{ currentRole.name }}</h3>
-      <p class="subtitle">点击建筑各个部位进行配色（共27个部位，当前演示5个）</p>
+      <p class="subtitle">点击建筑各个部位进行配色 </p>
 
       <div class="svg-container">
-        <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" class="interactive-svg">
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <rect width="20" height="20" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+        <svg viewBox="0 0 803 670" xmlns="http://www.w3.org/2000/svg" class="interactive-svg">
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <rect width="40" height="40" fill="none" stroke="#f0f0f0" stroke-width="1"/>
           </pattern>
           <rect width="100%" height="100%" fill="url(#grid)" />
 
-          <path 
-            d="M 100 150 L 250 80 L 400 150 Z" 
-            :fill="partsData['roof'].currentColor || 'transparent'" 
-            stroke="#2c3e50" stroke-width="2" 
-            class="clickable-part"
-            @click="openColorModal('roof')" 
-          />
-          <text x="235" y="130" font-size="12" fill="#666" pointer-events="none">屋顶</text>
-
           <rect 
-            x="120" y="150" width="260" height="150" 
-            :fill="partsData['wall'].currentColor || 'transparent'" 
-            stroke="#2c3e50" stroke-width="2" 
+            x="177" y="234" width="426" height="251" 
+            :fill="partsData['wall'].currentColor || '#ffffff'" 
+            stroke="black" stroke-width="2"
             class="clickable-part"
             @click="openColorModal('wall')" 
           />
-          <text x="230" y="220" font-size="12" fill="#666" pointer-events="none">主墙体</text>
+          <text x="390" y="220" font-size="20" fill="#666" pointer-events="none" text-anchor="middle">主墙体</text>
 
-          <rect 
-            x="210" y="200" width="40" height="100" 
-            :fill="partsData['doorLeft'].currentColor || 'transparent'" 
-            stroke="#2c3e50" stroke-width="2" 
+          <g 
+            :fill="partsData['doorsAndWindows'].currentColor || '#ffffff'" 
+            stroke="black" stroke-width="2"
             class="clickable-part"
-            @click="openColorModal('doorLeft')" 
-          />
-          
-          <rect 
-            x="250" y="200" width="40" height="100" 
-            :fill="partsData['doorRight'].currentColor || 'transparent'" 
-            stroke="#2c3e50" stroke-width="2" 
-            class="clickable-part"
-            @click="openColorModal('doorRight')" 
-          />
+            @click="openColorModal('doorsAndWindows')"
+          >
+            <path d="M397 289H347V486H397M397 289H447V486H397M397 289V486"/>
+            <path d="M417 384V373H408V384H417Z" />
+            <path d="M379 373V384H387V373H379Z" />
+            <path d="M222.5 302V288.5H288.5V302M222.5 302H288.5M222.5 302V407M288.5 302V407M507.5 302V288.5H559V302M507.5 302H559M507.5 302V407M559 302V407M222.5 407V417H288.5V407M222.5 407H288.5M507.5 407V417H559V407M507.5 407H559"/>
+          </g>
 
-          <rect 
-            x="80" y="300" width="340" height="30" 
-            :fill="partsData['base'].currentColor || 'transparent'" 
-            stroke="#2c3e50" stroke-width="2" 
+          <g 
+            :fill="partsData['base'].currentColor || '#ffffff'" 
             class="clickable-part"
-            @click="openColorModal('base')" 
-          />
-          <text x="240" y="320" font-size="12" fill="#666" pointer-events="none">台基</text>
+            @click="openColorModal('base')"
+          >
+            <path d="M651 539H136V513H651V539Z" stroke="black" stroke-width="2"/>
+            <path d="M632 513H153V486H632V513Z" stroke="black" stroke-width="2"/>
+          </g>
+          <text x="390" y="580" font-size="20" fill="#666" pointer-events="none" text-anchor="middle">台基</text>
+
+          <g 
+            :fill="partsData['pillars'].currentColor || '#ffffff'" 
+            class="clickable-part"
+            @click="openColorModal('pillars')"
+          >
+            <path d="M177 234V485.5H198.5V234H177Z" stroke="black" stroke-width="2"/>
+            <path d="M310.5 234H333V485.5H310.5V234Z" stroke="black" stroke-width="2"/>
+            <path d="M460 485.5H481.5V234H460V485.5Z" stroke="black" stroke-width="2"/>
+            <path d="M603 485.5V234H580.5V485.5H603Z" stroke="black" stroke-width="2"/>
+          </g>
+          <text x="140" y="380" font-size="20" fill="#666" pointer-events="none">立柱</text>
+
+          <g 
+            :fill="partsData['roof'].currentColor || '#ffffff'" 
+            class="clickable-part"
+            @click="openColorModal('roof')"
+          >
+            <path d="M602.5 234.5H176.5L149 207H630L602.5 234.5Z" stroke="black" stroke-width="2"/>
+            <path d="M146 129L156.5 148H616L625 129L599 140.281H167.5L146 129Z" stroke="black" stroke-width="2"/>
+            <path d="M155.909 147.5L123 206.5H656L616.5 147.5H155.909Z" stroke="black" stroke-width="2"/>
+          </g>
+          <text x="390" y="100" font-size="20" fill="#666" pointer-events="none" text-anchor="middle">屋顶</text>
+
         </svg>
       </div>
 
       <div class="progress-container">
         <div class="progress-info">
           <span>配色进度</span>
-          <span style="color: #0088cc; font-weight: bold;">{{ coloredCount }} / {{ totalParts }}</span>
+          <span style="color: #0088cc; font-weight: bold;">{{ coloredCount }} / 5</span>
         </div>
         <div class="progress-track">
-          <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+          <div class="progress-fill" :style="{ width: (coloredCount / 5 * 100) + '%' }"></div>
         </div>
       </div>
     </div>
@@ -97,7 +109,7 @@
       <div class="color-modal">
         <div class="modal-header">
           <h3>选择颜色材料</h3>
-          <p>为 <strong>{{ partsData[activePartId].name }}</strong> 选择合适的颜色</p>
+          <p>为 <strong>{{ partsData[activePartId]?.name }}</strong> 选择合适的颜色</p>
           <button class="close-btn" @click="closeModal">✕</button>
         </div>
 
@@ -166,12 +178,12 @@ export default {
 
       // --- 数据库 3：定义建筑的各个部位  ---
       partsData: {
-        'roof': { name: '屋顶', currentColor: null },
-        'wall': { name: '主墙体', currentColor: null },
-        'doorLeft': { name: '左门扇', currentColor: null },
-        'doorRight': { name: '右门扇', currentColor: null },
-        'base': { name: '台基', currentColor: null }
-      },
+  roof: { name: '屋顶', currentColor: null },
+  pillars: { name: '立柱', currentColor: null },
+  wall: { name: '主墙体', currentColor: null },
+  doorsAndWindows: { name: '门窗', currentColor: null },
+  base: { name: '台基', currentColor: null }
+},
       totalParts: 27, 
 
     

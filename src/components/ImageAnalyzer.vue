@@ -44,79 +44,91 @@
       </button>
     </div>
 
-    <div class="result-dashboard" :class="{ 'is-empty': !analysisResult }">
+   <div class="result-dashboard" :class="{ 'is-empty': !analysisResult }">
       
-      <div class="result-card ai-card">
-        <div class="card-header">
-          <span class="icon">🤖</span>
-          <h3>AI 多模态诊断报告</h3>
-        </div>
-        <div class="info-list">
-          <div class="info-item">
-            <span class="label">建筑制式</span>
-            <span class="value highlight">
-              {{ analysisResult ? analysisResult.ai_analysis.building_type : '待扫描...' }}
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="label">风格流派</span>
-            <span class="value">
-              {{ analysisResult ? analysisResult.ai_analysis.style : '--' }}
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="label">预估年代</span>
-            <span class="value tag" :class="{ 'empty-tag': !analysisResult }">
-              {{ analysisResult ? analysisResult.ai_analysis.estimated_era : '未知' }}
-            </span>
-          </div>
-          <div class="summary-box">
-            <strong>诊断总结：</strong> 
-            {{ analysisResult ? analysisResult.ai_analysis.summary : '请上传建筑影像并启动 AI 扫描，系统将自动输出深度诊断报告。' }}
-          </div>
-        </div>
+  <div class="result-card ai-card">
+    <div class="card-header">
+      <span class="icon">🤖</span>
+      <h3>AI 多模态诊断报告</h3>
+    </div>
+    <div class="info-list">
+      
+      <div class="info-item">
+        <span class="label">预估年代</span>
+        <span class="value highlight">
+          {{ analysisResult ? analysisResult.ai_analysis.dynasty_guess : '待扫描...' }}
+        </span>
+      </div>
+      
+      <div class="info-item">
+        <span class="label">建筑风格</span>
+        <span class="value">
+          {{ analysisResult ? analysisResult.ai_analysis.architecture_style : '--' }}
+        </span>
+      </div>
+      
+      <div class="info-item">
+        <span class="label">地域归属</span>
+        <span class="value tag" :class="{ 'empty-tag': !analysisResult }">
+          {{ analysisResult ? analysisResult.ai_analysis.province_level_region : '未知' }}
+        </span>
       </div>
 
-      <div class="result-card cv-card">
-        <div class="card-header">
-          <span class="icon">📊</span>
-          <h3>CV 底层色彩与纹理基因</h3>
-        </div>
-        <div class="info-list">
-          <div class="info-item">
-            <span class="label">皇室色彩浓度 (黄+红)</span>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" :style="{ width: analysisResult ? (analysisResult.royal_ratio * 100) + '%' : '0%' }"></div>
-            </div>
-            <span class="value-num">
-              {{ analysisResult ? (analysisResult.royal_ratio * 100).toFixed(1) + '%' : '0.0%' }}
-            </span>
-          </div>
-          
-          <div class="info-item">
-            <span class="label">正黄色彩占比</span>
-            <span class="value">
-              {{ analysisResult ? (analysisResult.ratio_yellow * 100).toFixed(2) + '%' : '--' }}
-            </span>
-          </div>
-          
-          <div class="info-item">
-            <span class="label">纹理复杂度 (GLCM熵值)</span>
-            <span class="value">
-              {{ analysisResult ? analysisResult.entropy.toFixed(4) : '--' }}
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="label">色相均值 (H-Mean)</span>
-            <span class="value">
-              {{ analysisResult ? analysisResult.h_mean.toFixed(4) : '--' }}
-            </span>
-          </div>
-        </div>
+      <div class="info-item">
+        <span class="label">结构特征</span>
+        <span class="value">
+          {{ analysisResult ? analysisResult.ai_analysis.structure_description : '--' }}
+        </span>
+      </div>
+
+      <div class="summary-box">
+        <strong>诊断总结：</strong> 
+        {{ analysisResult ? analysisResult.ai_analyze : '请上传建筑影像并启动 AI 扫描，系统将自动输出深度诊断报告。' }}
+      </div>
+    </div>
+  </div>
+
+  <div class="result-card cv-card">
+    <div class="card-header">
+      <span class="icon">📊</span>
+      <h3>CV 底层色彩与纹理基因</h3>
+    </div>
+    <div class="info-list">
+      
+      <div class="info-item">
+        <span class="label">核心色彩占比 (AI)</span>
+        <span class="value" style="color: #ff5e00; font-weight: bold;">
+          {{ analysisResult ? analysisResult.ai_analysis.color_ratio : '--' }}
+        </span>
+      </div>
+      
+      <div class="info-item">
+        <span class="label">边缘密度 (Edge Density)</span>
+        <span class="value">
+          {{ analysisResult && analysisResult.edge_density ? analysisResult.edge_density.toFixed(4) : '--' }}
+        </span>
+      </div>
+      
+      <div class="info-item">
+        <span class="label">纹理复杂度 (GLCM熵值)</span>
+        <span class="value">
+          {{ analysisResult && analysisResult.entropy ? analysisResult.entropy.toFixed(4) : '--' }}
+        </span>
+      </div>
+      
+      <div class="info-item">
+        <span class="label">色相均值 (H-Mean)</span>
+        <span class="value">
+          {{ analysisResult && analysisResult.h_mean ? analysisResult.h_mean.toFixed(4) : '--' }}
+        </span>
       </div>
 
     </div>
   </div>
+</div>
+
+    </div>
+  
 </template>
 <script>
 import axios from 'axios';
