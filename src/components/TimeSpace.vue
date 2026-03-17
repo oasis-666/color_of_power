@@ -93,9 +93,13 @@
       </div>
 
       <div class="center-column">
-        <div class="card map-card">
-          <h2 class="map-title">中国古建筑色彩地理分布</h2>
-         <div ref="mapBox" style="width: 100%; flex: 1; min-height: 550px;"></div>
+        <div class="card map-card" style="position: relative;"> <h2 class="map-title">中国古建筑色彩地理分布</h2>
+          
+          <div ref="mapBox" style="width: 100%; flex: 1; min-height: 550px;"></div>
+
+          <div class="map-copyright" style="position: absolute; bottom: 10px; right: 15px; font-size: 12px; color: rgba(150, 150, 150, 0.8); pointer-events: none; z-index: 999;">
+            本系统地图底图数据来源于高德开放平台（阿里云 DataV），审图号：GS(2025)5996，底图无修改。
+          </div>
         </div>
       </div>
 
@@ -724,7 +728,16 @@ this.currentCoreColors = data.coreColors;
   flex-direction: column; 
 }
 .map-title { text-align: center; color: #333; margin-top: 10; margin-bottom: 20px; }
-
+/* ================= 🌟 国赛合规地图水印样式 ================= */
+.map-copyright {
+  position: absolute;
+  bottom: 15px;      /* 距离地图容器底部 15px */
+  right: 20px;       /* 距离右侧边界 20px */
+  font-size: 12px;
+  color: rgba(150, 150, 150, 0.8); /* 优雅的浅灰色，不抢地图风头 */
+  pointer-events: none; /* 绝对核心！让鼠标能穿过这行字，保证地图仍然能拖拽、缩放 */
+  z-index: 999;      /* 确保它在最顶层，不被图表遮挡 */
+}
 .radar-card { flex: 1; min-height: 300px; }
 .stats-card { flex: 1; min-height: 320px; }
 

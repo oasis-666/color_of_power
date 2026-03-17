@@ -3,11 +3,25 @@
     
     <transition name="slide-up">
       <div v-if="showIntro" class="intro-screen" @click="closeIntro">
-        <div class="poetry-container">
-          <p class="poetry-line">「楹，天子丹，诸侯黝垩，</p>
-          <p class="poetry-line">大夫苍，士黈。」</p>
-          <p class="poetry-author">——《礼记》</p>
+        
+        <div class="poetry-wrapper">
+          
+          <div class="ornament-half left">
+            <img :src="wenyangImg" class="ornament-img" alt="ornament" />
+          </div>
+
+          <div class="poetry-container">
+            <p class="poetry-line">「楹，天子丹，诸侯黝垩，</p>
+            <p class="poetry-line">大夫苍，士黈。」</p>
+            <p class="poetry-author">——《礼记》</p>
+          </div>
+
+          <div class="ornament-half right">
+            <img :src="wenyangImg" class="ornament-img" alt="ornament" />
+          </div>
+
         </div>
+
         <div class="skip-hint">点击屏幕任意处开启系统</div>
       </div>
     </transition>
@@ -63,6 +77,7 @@
 </template>
 
 <script>
+import wenyangSvg from './assets/wenyang.svg';
 import TimeSpace from './components/TimeSpace.vue'
 import SpecialCase from './components/SpecialCase.vue' 
 import UserExp from './components/UserExp.vue';
@@ -79,6 +94,7 @@ export default {
 
   data() {
     return {
+      wenyangImg: wenyangSvg, 
       showIntro: true ,// 🌟 新增：默认显示开场动画
       activeTab: '时空分析' // 默认显示第一页
     }
@@ -88,7 +104,7 @@ mounted() {
     // 5秒后自动拉开帷幕（如果你觉得太慢，可以把 5000 改成 4000 或 3000）
     setTimeout(() => {
       this.showIntro = false;
-    }, 10000);
+    }, 100000);
   },
 
   methods: {
@@ -108,6 +124,53 @@ mounted() {
 </script>
 
 <style>
+/* ================= 🌟 纹样切割与排版样式 ================= */
+
+/* 1. 让图案和文字横向排列，垂直居中 */
+.poetry-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px; /* 图案和文字的间距 */
+}
+
+/* 2. 切分图片的“窗户” (只有原图一半宽) */
+.ornament-half {
+  width: 45vh; 
+  height: 90vh; 
+  position: relative; 
+  overflow: hidden; /* 核心：超出 150px 的部分切掉 */
+  opacity: 0;
+  animation: fadeOrnament 2s forwards 0.5s; /* 动画属性 */
+}
+
+/* 3. 完整的原图 (加了滤镜魔法) */
+.ornament-img {
+  width: 90vh;
+  height: 90vh;
+  position: absolute; 
+  top: 0;
+  
+  /* 魔法滤镜：反相去白底 -> 变复古色 -> 调成暗金 -> 提亮 */
+  filter: invert(0.9) sepia(0.5) hue-rotate(320deg) brightness(1.2); 
+  mix-blend-mode: screen; /* 让残余底色彻底融进黑背景 */
+}
+
+/* 4. 左半边：让图片靠左对齐 */
+.ornament-half.left .ornament-img {
+  left: 0;
+}
+
+/* 5. 右半边：让图片靠右对齐 */
+.ornament-half.right .ornament-img {
+  right: 0;
+}
+
+/* 6. 图案的淡入动画 (最终透明度 0.4，营造高级暗影感) */
+@keyframes fadeOrnament {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 0.4; transform: scale(1); }
+}
 /* 样式部分保持原样，无需修改 */
 body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
 .hero-section { width: 100vw; height: 100vh; background: linear-gradient(to right, #ff5e00, #ffb347); position: relative; }
@@ -193,7 +256,8 @@ body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #121212; /* 深邃的炭黑色，衬托历史的厚重 */
+/* 替换原来的 background-color */
+background: radial-gradient(circle at center, #161b26 0%, #080a10 100%);
   z-index: 9999; /* 保证它盖住所有东西 */
   display: flex;
   justify-content: center;
