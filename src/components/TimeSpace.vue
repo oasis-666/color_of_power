@@ -62,7 +62,9 @@
       v-for="(color, index) in currentCoreColors" 
       :key="index"
     >
-      <span :style="{ color: color.hex, fontWeight: 'bold', fontSize: '24px' }">{{ color.name }}</span>
+      <span :style="{ color: color.hex, fontWeight: 'bold', fontSize: '24px' }">
+  {{ color.displayName }}
+</span>
     </div>
   </div>
 
@@ -152,125 +154,43 @@
 
 <script>
 import * as echarts from 'echarts';
+import { request } from '/src/utils/request.js';
+import { getClassicalName } from '/src/utils/colorNames.js';
 
 export default {
   name: 'TimeSpace',
-  
 
   data() {
     return {
-      colorLevels: [
-        { name: '皇家', value: 127, percent: '10%', color: '#ffbb00' },
-        { name: '王公', value: 389, percent: '25%', color: '#2ca02c' },
-        { name: '官员', value: 892, percent: '50%', color: '#0088cc' },
-        { name: '富户', value: 1567, percent: '75%', color: '#666666' },
-        { name: '平民', value: 4523, percent: '100%', color: '#333333' }
-      ],
-      currentTab: '朝代对比', // 默认选中第一个
-      // 🌟 新增：时间轴的数据大脑
+      colorLevels: [],
+      currentTab: '朝代对比', 
+      
       dynasties: [
-        { short: '唐', name: '唐朝', time: '618-907', color: '#ffbb00' }, // 黄色
-        { short: '宋', name: '宋朝', time: '960-1279', color: '#0088cc' }, // 蓝色
-        { short: '元', name: '元朝', time: '1271-1368', color: '#2ca02c' }, // 绿色
-        { short: '明', name: '明朝', time: '1368-1644', color: '#ff5e00' }, // 橙色
-        { short: '清', name: '清朝', time: '1644-1912', color: '#ffbb00' }  // 黄色
+        { short: '唐', name: '唐朝', time: '618-907', color: '#ffbb00', mainColor: '#982A22', accentColor: '#ff5e00' }, 
+        { short: '宋', name: '宋朝', time: '960-1279', color: '#0088cc', mainColor: '#0088cc', accentColor: '#40fcfc' }, 
+        { short: '元', name: '元朝', time: '1271-1368', color: '#2ca02c', mainColor: '#f2eada', accentColor: '#d3b17d' }, 
+        { short: '明', name: '明朝', time: '1368-1644', color: '#ff5e00', mainColor: '#ffbb00', accentColor: '#ffff00' }, 
+        { short: '清', name: '清朝', time: '1644-1912', color: '#ffbb00', mainColor: '#EBA53D', accentColor: '#ffbb00' }  
       ],
-      currentDynastyIndex: 0, // 当前选中的朝代编号（0就是唐朝）
-      isPlaying: false,       // 记录现在是不是正在自动播放
-      timer: null,            // 存放闹钟的专属变量
-      // 🌟 新增：动态标题和统计数据变量
-      currentPanelTitle: '唐朝数据', // 默认跟你的 currentDynastyIndex: 0 (唐朝) 对应
+      currentDynastyIndex: 0, 
+      isPlaying: false,       
+      timer: null,            
+      currentPanelTitle: '唐朝数据', 
       currentDynastyName: '唐朝',
       currentStats: { totalBuildings: 3100, yellowCount: 40, redCount: 450, greenCount: 800 },
-// 🌟 新增：當前核心色彩與標籤
       currentCoreColors: [],
       currentTags: [],
-      // 🌟 新增：前端假数据库 (包含唐宋元明清)
-      mockDatabase: {
-        '唐朝': {
-          stats: { totalBuildings: 3100, yellowCount: 40, redCount: 450, greenCount: 800 },
-          radarData: [40, 60, 90, 50, 85, 60], 
-          mapData: [{ name: '西北地區', value: 2100 }, { name: '中南地區', value: 600 }],
-          barData: [40, 150, 450, 800, 1660],
-          // 👇 唐朝專屬色彩：朱白相間，雄渾大氣
-          coreColors: [
-            { name: '朱', hex: '#c02c38' }, { name: '白', hex: '#f2eada' },
-            { name: '青', hex: '#1661ab' }, { name: '黑', hex: '#131124' }
-          ],
-          tags: ['朱白相間', '雄渾大氣', '木本色', '彩畫初現']
-        },
-        '宋朝': {
-          stats: { totalBuildings: 4200, yellowCount: 60, redCount: 520, greenCount: 600 },
-          radarData: [50, 70, 80, 60, 70, 65],
-          mapData: [{ name: '華東地區', value: 1500 }, { name: '中南地區', value: 1200 }],
-          barData: [60, 200, 520, 1000, 2420],
-          // 👇 宋朝專屬色彩：青綠輝映，淡雅柔和
-          coreColors: [
-            { name: '青', hex: '#5cb3cc' }, { name: '綠', hex: '#45b787' },
-            { name: '白', hex: '#f2eada' }, { name: '褐', hex: '#845a33' }
-          ],
-          tags: ['青綠輝映', '淡雅柔和', '醇和素雅', '建築彩畫']
-        },
-        '元朝': {
-          stats: { totalBuildings: 2800, yellowCount: 80, redCount: 400, greenCount: 300 },
-          radarData: [70, 60, 40, 50, 60, 50],
-          mapData: [{ name: '華北地區', value: 1600 }, { name: '西北地區', value: 500 }],
-          barData: [80, 180, 400, 700, 1440],
-          // 👇 元朝專屬色彩：白牆青瓦，略帶粗獷
-          coreColors: [
-            { name: '白', hex: '#f2eada' }, { name: '青', hex: '#5cb3cc' },
-            { name: '灰', hex: '#808080' }, { name: '土', hex: '#d3b17d' }
-          ],
-          tags: ['崇白尚青', '粗獷豪放', '琉璃漸興', '多元融合']
-        },
-        '明朝': {
-          stats: { totalBuildings: 5320, yellowCount: 95, redCount: 620, greenCount: 310 },
-          radarData: [80, 70, 50, 60, 60, 75],
-          mapData: [{ name: '華北地區', value: 1800 }, { name: '中南地區', value: 900 }, { name: '華東地區', value: 1100 }],
-          barData: [95, 210, 620, 1100, 3295],
-          // 👇 明朝專屬色彩：紅牆黃瓦開始定型
-          coreColors: [
-            { name: '紅', hex: '#e60000' }, { name: '黃', hex: '#ffbb00' },
-            { name: '青', hex: '#0088cc' }, { name: '綠', hex: '#2ca02c' }
-          ],
-          tags: ['紅牆黃瓦', '旋子彩畫', '等級森嚴', '色彩濃烈']
-        },
-        '清朝': {
-          stats: { totalBuildings: 7498, yellowCount: 127, redCount: 892, greenCount: 516 },
-          radarData: [90, 85, 60, 40, 70, 80],
-          mapData: [{ name: '華北地區', value: 1200 }, { name: '西南地區', value: 1500 }, { name: '華東地區', value: 850 }, { name: '西北地區', value: 320 }],
-          barData: [127, 389, 892, 1567, 4523],
-          // 👇 清朝專屬色彩：金碧輝煌，極致繁複
-          coreColors: [
-            { name: '黃', hex: '#ffbb00' }, { name: '紅', hex: '#e60000' },
-            { name: '綠', hex: '#2ca02c' }, { name: '青', hex: '#0088cc' }
-          ],
-          tags: ['琉璃', '朱紅', '和璽彩畫', '皇權極致']
-        }
-      },
-      // 配置四张图表的标题和说明文字
+      
+      mockDatabase: { /* 保持假数据不动 */ },
       tabInfo: {
-        '朝代对比': {
-          title: '各朝代建筑等级分布对比',
-          desc: '展示唐、宋、元、明、清五个朝代的建筑等级分布情况，数据基于历史文献记载和现存建筑统计。'
-        },
-        '历史趋势': {
-          title: '历代色彩使用趋势变化',
-          desc: '追踪从唐代至清末不同色彩建筑材料的使用数量变化，反映礼制演变与建筑技术发展。'
-        },
-        '区域分布': {
-          title: '主要区域建筑等级分布',
-          desc: '对比北京、陕西、江苏、浙江、山西五个重要历史区域的建筑等级分布特点。'
-        },
-        '材料成本': {
-          title: '建筑材料成本与工艺分析',
-          desc: '分析不同色彩建筑材料的经济成本、制作工艺难度和材料稀有程度（指数化表示）。'
-        }
+        '朝代对比': { title: '各朝代建筑等级分布对比', desc: '展示唐、宋、元、明、清五个朝代的建筑等级分布情况，数据基于历史文献记载和现存建筑统计。' },
+        '历史趋势': { title: '历代色彩使用趋势变化', desc: '追踪从唐代至清末不同色彩建筑材料的使用数量变化，反映礼制演变与建筑技术发展。' },
+        '区域分布': { title: '主要区域建筑等级分布', desc: '对比北京、陕西、江苏、浙江、山西五个重要历史区域的建筑等级分布特点。' },
+        '材料成本': { title: '建筑材料成本与工艺分析', desc: '分析不同色彩建筑材料的经济成本、制作工艺难度和材料稀有程度（指数化表示）。' }
       }
     }
   },
 
-  // 计算属性：根据当前的 Tab 自动算出应该显示的标题和说明
   computed: {
     currentChartTitle() { return this.tabInfo[this.currentTab].title; },
     currentDescription() { return this.tabInfo[this.currentTab].desc; }
@@ -280,9 +200,11 @@ export default {
     this.initRadarChart();
     this.initStatsChart();
     this.initMapChart();
-    
-    // 初始化底部的大图表！
+    this.fetchColorLevels();
     this.initAnalysisChart();
+    
+    // 页面加载自动触发一次唐朝数据
+    this.selectDynasty(0);
     
     window.addEventListener('resize', () => {
       if(this.radarChart) this.radarChart.resize();
@@ -293,620 +215,482 @@ export default {
   },
 
   methods: {
-    // 保持原来的三个图表函数不变...
+    getCurrentDynastyColors() {
+      const selected = this.dynasties[this.currentDynastyIndex];
+      return selected.mainColor ? [selected.mainColor, selected.accentColor] : ['#3169b2', '#00cccc']; 
+    },
+
+    initAnalysisChart() {
+      const chartDom = this.$refs.bottomBox;
+      if (!chartDom) return;
+      this.analysisChart = echarts.init(chartDom);
+      this.renderChartByTab(this.currentTab);
+    },
+
     initRadarChart() {
       const chartDom = this.$refs.radarBox;
       if (!chartDom) return;
-      this.radarChart = echarts.init(chartDom);
+      if (!this.radarChart) {
+        this.radarChart = echarts.init(chartDom);
+      }
+      
+      const colors = this.getCurrentDynastyColors();
+
       this.radarChart.setOption({
+        tooltip: { show: true },
         radar: {
           indicator: [
             { name: '黄色使用', max: 100 }, { name: '红色', max: 100 },
             { name: '绿色', max: 100 }, { name: '青色', max: 100 },
             { name: '明度', max: 100 }, { name: '饱和度', max: 100 }
           ],
-          radius: '60%', center: ['50%', '55%'] 
+          shape: 'circle', 
+          radius: '65%', center: ['50%', '55%'],
+          splitNumber: 4,
+          // ✅ 修复了这里的字体错漏
+          name: { textStyle: { color: '#e6c280', fontSize: 13, fontFamily: "STKaiti, serif" } },
+          splitLine: { lineStyle: { color: ['rgba(230, 194, 128, 0.1)', 'rgba(230, 194, 128, 0.3)'] } },
+          splitArea: { show: false },
+          axisLine: { lineStyle: { color: 'rgba(230, 194, 128, 0.3)' } }
         },
-        series: [{ type: 'radar', data: [{ value: [90, 85, 60, 40, 70, 80], name: '清朝', itemStyle: { color: '#ff5e00' }, areaStyle: { color: 'rgba(255, 94, 0, 0.4)' } }] }]
+        series: [{ 
+          type: 'radar', 
+          data: [{ value: [0, 0, 0, 0, 0, 0], name: '数据加载中...' }],
+          itemStyle: { color: colors[0], borderColor: colors[1], borderWidth: 2 },
+          lineStyle: { width: 2, color: colors[1] },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
+              { offset: 0, color: colors[0] }, 
+              { offset: 1, color: 'transparent' } 
+            ])
+          },
+          shadowBlur: 15, shadowColor: colors[1]
+        }]
       });
     },
+
     initStatsChart() {
       const chartDom = this.$refs.statsBox;
       if (!chartDom) return;
-      this.statsChart = echarts.init(chartDom);
+      if (!this.statsChart) {
+        this.statsChart = echarts.init(chartDom);
+      }
+      
+      const colors = this.getCurrentDynastyColors();
+
       this.statsChart.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         grid: { left: '3%', right: '15%', bottom: '3%', top: '5%', containLabel: true },
         xAxis: { type: 'value', show: false }, 
-        yAxis: { type: 'category', data: ['平民建筑', '富户建筑', '官员建筑', '王公建筑', '皇家建筑'], axisLine: { show: false }, axisTick: { show: false } },
-        series: [{ name: '建筑数量', type: 'bar', data: [4523, 1567, 892, 389, 127], barWidth: '40%', itemStyle: { color: '#ff8c00', borderRadius: [0, 10, 10, 0] }, label: { show: true, position: 'right', color: '#666' } }]
+        yAxis: { 
+          type: 'category', data: ['平民', '富户', '官员', '王公', '皇家'], 
+          axisLine: { show: false }, axisTick: { show: false },
+          // ✅ 修复了这里的字体错漏
+          axisLabel: { color: '#fdf6e3', fontFamily: "STKaiti, serif", fontSize: 13 }
+        },
+        series: [{ 
+          name: '建筑数量', type: 'bar', data: [0, 0, 0, 0, 0], barWidth: '35%', 
+          itemStyle: { 
+            color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+              { offset: 0, color: colors[1] },
+              { offset: 1, color: colors[0] }
+            ]),
+            borderRadius: [0, 4, 4, 0] 
+          }, 
+          label: { show: true, position: 'right', color: '#e6c280', fontWeight: 'bold' },
+          shadowBlur: 10, shadowColor: colors[1]
+        }]
       });
     },
+
     async initMapChart() {
       const chartDom = this.$refs.mapBox;
       if (!chartDom) return;
-      this.mapChart = echarts.init(chartDom);
-      this.mapChart.showLoading({ text: '正在召唤中国版图...' });
+      if (!this.mapChart) {
+        this.mapChart = echarts.init(chartDom);
+        this.mapChart.showLoading({ text: '正在召唤中国版图...', color: '#e6c280', maskColor: 'rgba(0,0,0,0.5)' });
+        try {
+          const response = await fetch('/chinamap.json');
+          const geoJson = await response.json();
+          this.mapChart.hideLoading();
+          echarts.registerMap('china', geoJson);
+        } catch (error) { 
+          console.error('获取地图数据失败:', error); 
+          this.mapChart.hideLoading(); 
+          return;
+        }
+      }
+
+      this.mapChart.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}<br/>建筑数量：{c} 座', backgroundColor: 'rgba(10, 17, 40, 0.8)', textStyle: { color: '#e6c280' } },
+        visualMap: { 
+          min: 0, max: 200, left: '3%', bottom: '5%', 
+          text: ['多', '少'], calculable: true, 
+          textStyle: { color: '#e6c280' }, 
+          inRange: { color: ['#3a080a', '#982A22', '#ffbb00'] } 
+        },
+        series: [{
+          name: '中国地图', type: 'map', map: 'china', roam: false, zoom: 1.1,
+          label: { show: true, color: 'rgba(253, 246, 227, 0.6)', fontSize: 10 },
+          itemStyle: { 
+            areaColor: '#10182b', 
+            borderColor: 'rgba(230, 194, 128, 0.3)',
+            borderWidth: 1,
+            shadowColor: 'rgba(0,0,0,0.5)', shadowBlur: 10 
+          },
+          emphasis: { 
+            label: { color: '#fff', fontWeight: 'bold' }, 
+            itemStyle: { areaColor: '#982A22', borderColor: '#ffbb00', shadowBlur: 20, shadowColor: '#ffbb00' } 
+          },
+          data: [] 
+        }]
+      });
+    },
+
+    async updateAllCharts(dynastyName) {
+      console.log(`📡 正在请求 【${dynastyName}】 的真实数据...`);
+      const dynastyMap = { '唐朝': 'tang', '宋朝': 'song', '元朝': 'yuan', '明朝': 'ming', '清朝': 'qing' };
+      const dynastyKey = dynastyMap[dynastyName] || 'qing';
+
+      try {
+        const [statsRes, levelRes, colorRes, radarRes, mapRes] = await Promise.all([
+          request.get('/api/dashboard/dynasty-stats', { params: { dynasty: dynastyKey } }),
+          request.get('/api/dashboard/level-stats', { params: { dynasty: dynastyKey } }),
+          request.get('/api/dashboard/core-colors', { params: { dynasty: dynastyKey } }),
+          request.get('/api/dashboard/color-analysis', { params: { dynasty: dynastyKey } }),
+          request.get('/api/dashboard/map-distribution', { params: { dynasty: dynastyKey } })
+        ]);
+
+        if (statsRes.code === 200) this.currentStats = statsRes.data;
+
+        if (levelRes.code === 200) {
+          const levels = levelRes.data.levels;
+          this.colorLevels = levels.map(item => ({
+            name: item.label.replace('建筑', ''),
+            value: item.value,
+            percent: Math.round(item.ratio * 100) + '%',
+            color: this.getLevelColor(item.label)
+          }));
+          if (this.statsChart) {
+            this.statsChart.setOption({
+              series: [{ data: levels.map(item => item.value) }]
+            });
+          }
+        }
+
+        if (colorRes.code === 200) {
+          this.currentCoreColors = colorRes.data.colors.map(colorObj => {
+            const fullName = colorObj.name.endsWith('色') ? colorObj.name : colorObj.name + '色';
+            return {
+              ...colorObj,
+              displayName: getClassicalName(fullName, dynastyKey) 
+            };
+          });
+          this.currentTags = colorRes.data.cultureTags;
+        }
+
+        if (radarRes.code === 200 && this.radarChart) {
+          this.radarChart.setOption({
+            series: [{ data: [{ value: radarRes.data.indicators.map(i => i.value), name: dynastyName }] }]
+          });
+        }
+
+        if (mapRes.code === 200 && this.mapChart) {
+          let finalMapData = [];
+          mapRes.data.regions.forEach(region => {
+            region.provinces.forEach(prov => {
+              finalMapData.push({ name: prov, value: region.value });
+            });
+          });
+          this.mapChart.setOption({ series: [{ data: finalMapData }] });
+        }
+        console.log(`✅ 【${dynastyName}】 数据联调成功！`);
+      } catch (error) {
+        console.error('联调失败：', error);
+      }
+    },
+
+    getLevelColor(label) {
+      const colorMap = { '皇家建筑': '#e6c280', '王公建筑': '#982A22', '官员建筑': '#3169b2', '富户建筑': '#2ca02c', '平民建筑': '#666666' };
+      const name = label.includes('建筑') ? label : label + '建筑';
+      return colorMap[name] || '#999';
+    },
+
+    async renderChartByTab(tabName) {
+      if (!this.analysisChart) return;
+      this.analysisChart.showLoading({ text: '正在调取历史档案...', color: '#e6c280', maskColor: 'rgba(0,0,0,0.5)' });
       
       try {
-        // 读取本地 public 文件夹下的中国地图数据
-        const response = await fetch('/chinamap.json');
-        const geoJson = await response.json();
-        this.mapChart.hideLoading();
-        echarts.registerMap('china', geoJson);
+        let option = {};
+        // ✅ 修复了这里的字体错漏
+        const textStyleBase = { color: '#fdf6e3', fontFamily: "STKaiti, serif" };
 
-
-        
-        // ================= 重点改造开始 =================
-
-        // 1. 模拟后端传来的【大方位数据】（以后替换成接口返回的数据即可）
-        const backendRegionData = [
-          { name: '华北地区', value: 1200 },
-          { name: '华东地区', value: 850 },
-          { name: '中南地区', value: 640 },
-          { name: '西南地区', value: 1500 },
-          { name: '西北地区', value: 320 },
-          { name: '东北地区', value: 150 }
-        ];
-
-        // 2. 前端自带的【大区-省份映射字典】（你可以在这自己增减）
-        const regionDict = {
-          '华北地区': ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区'],
-          '东北地区': ['辽宁省', '吉林省', '黑龙江省'],
-          '华东地区': ['上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '台湾省'],
-          '中南地区': ['河南省', '湖北省', '湖南省', '广东省', '广西壮族自治区', '海南省', '香港特别行政区', '澳门特别行政区'],
-          '西南地区': ['重庆市', '四川省', '贵州省', '云南省', '西藏自治区'],
-          '西北地区': ['陕西省', '甘肃省', '青海省', '宁夏回族自治区', '新疆维吾尔自治区']
-        };
-
-        // 3. 施展魔法：把大区数据“裂变”成 ECharts 需要的省份数据
-        let mapData = [];
-        backendRegionData.forEach(region => {
-          const provinces = regionDict[region.name];
-          if (provinces) {
-            provinces.forEach(prov => {
-              mapData.push({
-                name: prov,
-                value: region.value,
-                regionName: region.name // 偷偷存一下大区名字，留给鼠标悬浮提示用
-              });
-            });
+        if (tabName === '朝代对比') {
+          const res = await request.get('/api/dashboard/dynasty-comparison'); 
+          if (res.code === 200) {
+            const { timeline, series } = res.data; 
+            option = {
+              tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10,17,40,0.8)', textStyle: { color: '#e6c280' } },
+              legend: { bottom: 0, textStyle: textStyleBase },
+              grid: { left: '3%', right: '4%', bottom: '15%', top: '5%', containLabel: true },
+              xAxis: { type: 'category', data: timeline, axisLabel: textStyleBase }, 
+              yAxis: { type: 'value', axisLabel: textStyleBase, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } } },
+              series: series.map(s => ({
+                name: s.rankName, type: 'bar', stack: 'total', data: s.data, itemStyle: { color: s.color } 
+              }))
+            };
           }
-        });
-
-        // ================= 重点改造结束 =================
-
-        this.mapChart.setOption({
-          // 修改 Tooltip，只顯示大區名稱和數量，隱藏具體省份名稱
-          tooltip: { 
-            trigger: 'item', 
-            formatter: function(params) {
-              if (params.data && params.data.regionName) {
-                // 顯示效果：西南地區：1500 座 (不再顯示具體省份)
-                return `<div style="padding: 3px 5px;">
-                          <strong style="color:#ff5e00; font-size: 15px;">${params.data.regionName}</strong><br/>
-                          <span style="color:#666;">建築數量：</span><strong style="font-size: 14px;">${params.value} 座</strong>
-                        </div>`;
-              }
-              // 如果滑鼠移到沒有數據的省份（例如西藏如果沒被包含進去）
-              return `<div style="color:#999;">${params.name}：暫無數據</div>`;
-            }
-          },
-          visualMap: { 
-            min: 0, max: 2000, left: '3%', bottom: '5%', 
-            text: ['多', '少'], calculable: true, 
-            inRange: { color: ['#a1c4fd', '#3169b2'] } 
-          },
-          series: [{
-            name: '中国地图', type: 'map', map: 'china', roam: false, zoom: 1.1,
-            label: { show: true, color: '#ffffff', fontSize: 10 },
-            itemStyle: { borderColor: '#ffffff', borderWidth: 1 },
-            emphasis: { label: { color: '#fff' }, itemStyle: { areaColor: '#ff5e00' } },
-            data: mapData // 把转换好的大区数据塞进来
-          }]
-        });
-      } catch (error) { 
-        console.error('获取地图数据失败:', error); 
-        this.mapChart.hideLoading(); 
-      }
-    },
-
-    // ================= 终极魔法：底部交互图表 =================
-    initAnalysisChart() {
-      const chartDom = this.$refs.bottomBox;
-      if (!chartDom) return;
-      // 初始化唯一的一个画板
-      this.analysisChart = echarts.init(chartDom);
-      // 默认画第一张图（朝代对比）
-      this.renderChartByTab(this.currentTab);
-    },
-
-    // 核心切换逻辑：用户点击按钮时触发
-    switchTab(tabName) {
-      this.currentTab = tabName; // 更新按钮状态
-      this.renderChartByTab(tabName); // 命令画师重新画图
-    },
-
-    // 🌟 核心魔法：根據朝代名稱，刷新全場數據！
-    updateAllCharts(dynastyName) {
-      // 1. 從假資料庫裡撈出這個朝代的數據
-      const data = this.mockDatabase[dynastyName] || this.mockDatabase['清朝'];
-this.currentCoreColors = data.coreColors;
-      this.currentTags = data.tags;
-      // 2. 刷新左下角的數字面板
-      this.currentStats = data.stats;
-
-      // ================= 🌟 這次新增的修改點 =================
-
-      // 3. 刷新左上角：建築色彩等級 (更新數字和進度條長度)
-      // 找出當前數據裡的最大值，讓數量最多的那個級別進度條長度為 100%
-      const maxValue = Math.max(...data.barData); 
-      this.colorLevels.forEach((level, index) => {
-        level.value = data.barData[index];
-        // 動態計算百分比，用來控制進度條的 CSS 寬度
-        level.percent = Math.round((level.value / maxValue) * 100) + '%';
-      });
-
-      // 4. 刷新右下角：等級數據統計 (ECharts 橫向柱狀圖)
-      // 我看到你之前的截圖裡有 initStatsChart，所以假設實例叫做 this.statsChart
-      if (this.statsChart) {
-        this.statsChart.setOption({
-          series: [{
-            // 注意：ECharts 橫向柱狀圖的數據預設是從下往上畫的。
-            // 如果你發現圖表上的長短順序和左邊對不上，就把 data.barData 換成 data.barData.slice().reverse()
-            data: data.barData.slice().reverse() 
-          }]
-        });
-      }
-
-      // ===================================================
-
-      // 5. 刷新右上角：雷達圖動畫
-      if (this.radarChart) {
-        this.radarChart.setOption({
-          series: [{ data: [{ value: data.radarData, name: dynastyName }] }]
-        });
-      }
-
-      // 6. 刷新中間：地圖動畫
-      if (this.mapChart) {
-        const regionDict = {
-          '華北地區': ['北京市', '天津市', '河北省', '山西省', '內蒙古自治區'],
-          '東北地區': ['遼寧省', '吉林省', '黑龍江省'],
-          '華東地區': ['上海市', '江蘇省', '浙江省', '安徽省', '福建省', '江西省', '山東省', '台灣省'],
-          '中南地區': ['河南省', '湖北省', '湖南省', '廣東省', '廣西壯族自治區', '海南省', '香港特別行政區', '澳門特別行政區'],
-          '西南地區': ['重慶市', '四川省', '貴州省', '雲南省', '西藏自治區'],
-          '西北地區': ['陝西省', '甘肅省', '青海省', '寧夏回族自治區', '新疆維吾爾自治區']
-        };
-        let finalMapData = [];
-        data.mapData.forEach(region => {
-          const provinces = regionDict[region.name] || regionDict[region.name.replace('地区', '地區')]; // 容錯繁簡體
-          if (provinces) {
-            provinces.forEach(prov => {
-              finalMapData.push({ name: prov, value: region.value, regionName: region.name });
-            });
+        } 
+        else if (tabName === '历史趋势') {
+          const res = await request.get('/api/dashboard/history-trend'); 
+          if (res.code === 200) {
+            const { years, series } = res.data; 
+            option = {
+              tooltip: { trigger: 'axis', backgroundColor: 'rgba(10,17,40,0.8)', textStyle: { color: '#e6c280' } },
+              legend: { bottom: 0, textStyle: textStyleBase },
+              grid: { left: '3%', right: '4%', bottom: '15%', top: '5%', containLabel: true },
+              xAxis: { type: 'category', boundaryGap: false, data: years.map(String), axisLabel: textStyleBase }, 
+              yAxis: { type: 'value', axisLabel: textStyleBase, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } } },
+              series: series.map(s => ({
+                name: s.materialName, type: 'line', stack: 'Total', smooth: true,
+                areaStyle: { opacity: 0.8, color: s.color }, data: s.data 
+              }))
+            };
           }
-        });
-        this.mapChart.setOption({ series: [{ data: finalMapData }] });
-      }
-    },
-    // 专门负责根据不同的 Tab，喂给画师不同的图纸 (Option)
-    renderChartByTab(tabName) {
-      let option = {};
-      
-      if (tabName === '朝代对比') {
-        // 1. 堆叠柱状图
-        option = {
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-          legend: { data: ['官员', '富户', '平民', '王公', '皇家'], bottom: 0 },
-          grid: { left: '3%', right: '4%', bottom: '10%', top: '5%', containLabel: true },
-          xAxis: { type: 'category', data: ['唐', '宋', '元', '明', '清'] },
-          yAxis: { type: 'value' },
-          series: [
-            { name: '官员', type: 'bar', stack: 'total', data: [320, 302, 301, 334, 390], itemStyle: {color: '#0088cc'} },
-            { name: '富户', type: 'bar', stack: 'total', data: [120, 132, 101, 134, 90], itemStyle: {color: '#666666'} },
-            { name: '平民', type: 'bar', stack: 'total', data: [220, 182, 191, 234, 290], itemStyle: {color: '#333333'} },
-            { name: '王公', type: 'bar', stack: 'total', data: [150, 212, 201, 154, 190], itemStyle: {color: '#2ca02c'} },
-            { name: '皇家', type: 'bar', stack: 'total', data: [820, 832, 901, 934, 1290], itemStyle: {color: '#ffbb00'} }
-          ]
-        };
-      } 
-      else if (tabName === '历史趋势') {
-        // 2. 波浪面积图 (Stacked Area Chart)
-        option = {
-          tooltip: { trigger: 'axis' },
-          legend: { data: ['红色墙体', '绿色琉璃瓦', '青色瓦片', '黄色琉璃瓦'], bottom: 0 },
-          grid: { left: '3%', right: '4%', bottom: '10%', top: '5%', containLabel: true },
-          xAxis: { type: 'category', boundaryGap: false, data: ['618', '750', '960', '1200', '1368', '1644', '1800'] },
-          yAxis: { type: 'value' },
-          series: [
-            { name: '黄色琉璃瓦', type: 'line', stack: 'Total', smooth: true, lineStyle: {width: 0}, showSymbol: false, areaStyle: {opacity: 0.8, color: '#ffbb00'}, data: [10, 20, 30, 23, 50, 80, 120] },
-            { name: '青色瓦片', type: 'line', stack: 'Total', smooth: true, lineStyle: {width: 0}, showSymbol: false, areaStyle: {opacity: 0.8, color: '#3169b2'}, data: [200, 300, 400, 389, 500, 700, 900] },
-            { name: '绿色琉璃瓦', type: 'line', stack: 'Total', smooth: true, lineStyle: {width: 0}, showSymbol: false, areaStyle: {opacity: 0.8, color: '#2ca02c'}, data: [20, 30, 50, 43, 80, 100, 150] },
-            { name: '红色墙体', type: 'line', stack: 'Total', smooth: true, lineStyle: {width: 0}, showSymbol: false, areaStyle: {opacity: 0.8, color: '#ff5e00'}, data: [50, 60, 80, 98, 150, 200, 300] }
-          ]
-        };
-      }
-      else if (tabName === '区域分布') {
-        // 3. 混合图表：柱状图 + 折线图
-        option = {
-          tooltip: { trigger: 'axis' },
-          legend: { data: ['官员', '民居', '王公', '皇家'], bottom: 0 },
-          grid: { left: '3%', right: '4%', bottom: '10%', top: '5%', containLabel: true },
-          xAxis: { type: 'category', data: ['北京', '陕西', '江苏', '浙江', '山西'] },
-          yAxis: { type: 'value' },
-          series: [
-            { name: '王公', type: 'bar', data: [150, 80, 178, 120, 130], itemStyle: {color: '#2ca02c'} },
-            { name: '皇家', type: 'bar', data: [90, 20, 34, 10, 25], itemStyle: {color: '#ffbb00'} },
-            { name: '官员', type: 'line', data: [230, 230, 456, 390, 560], symbolSize: 8, itemStyle: {color: '#0088cc'}, lineStyle: {width: 3} },
-            { name: '民居', type: 'line', data: [560, 890, 1234, 980, 1450], symbol: 'none', lineStyle: {type: 'dashed', color: '#666'} }
-          ]
-        };
-      }
-      else if (tabName === '材料成本') {
-        // 4. 多维水平柱状图
-        option = {
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-          legend: { data: ['工艺难度', '成本指数', '稀有度'], bottom: 0 },
-          grid: { left: '3%', right: '4%', bottom: '10%', top: '5%', containLabel: true },
-          xAxis: { type: 'value', max: 100 },
-          yAxis: { type: 'category', data: ['灰黑瓦片', '青色瓦片', '朱红漆料', '绿色琉璃瓦', '黄色琉璃瓦'] },
-          series: [
-            { name: '工艺难度', type: 'bar', data: [25, 50, 88, 78, 95], itemStyle: {color: '#ffbb00'} },
-            { name: '成本指数', type: 'bar', data: [15, 45, 85, 65, 100], itemStyle: {color: '#ff5e00'} },
-            { name: '稀有度', type: 'bar', data: [10, 30, 82, 55, 98], itemStyle: {color: '#0088cc'} }
-          ]
-        };
-      }
+        }
+        else if (tabName === '区域分布') {
+          const res = await request.get('/api/dashboard/region-rank-dist'); 
+          if (res.code === 200) {
+            const { provinces, series } = res.data; 
+            option = {
+              tooltip: { trigger: 'axis', backgroundColor: 'rgba(10,17,40,0.8)', textStyle: { color: '#e6c280' } },
+              legend: { bottom: 0, textStyle: textStyleBase },
+              grid: { left: '3%', right: '4%', bottom: '15%', top: '5%', containLabel: true },
+              xAxis: { type: 'category', data: provinces, axisLabel: textStyleBase }, 
+              yAxis: { type: 'value', axisLabel: textStyleBase, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } } },
+              series: series.map(s => ({
+                name: s.name, type: s.type, data: s.data, itemStyle: { color: s.color }, 
+                lineStyle: s.lineStyle === 'dashed' ? { type: 'dashed' } : {} 
+              }))
+            };
+          }
+        }
+        else if (tabName === '材料成本') {
+          const res = await request.get('/api/dashboard/material-analysis'); 
+          if (res.code === 200) {
+            const { dimensions, materials } = res.data; 
+            option = {
+              tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10,17,40,0.8)', textStyle: { color: '#e6c280' } },
+              legend: { bottom: 0, textStyle: textStyleBase },
+              grid: { left: '3%', right: '4%', bottom: '15%', top: '5%', containLabel: true },
+              xAxis: { type: 'value', max: 100, axisLabel: textStyleBase, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } } },
+              yAxis: { type: 'category', data: materials.map(m => m.name), axisLabel: textStyleBase }, 
+              series: dimensions.map((dim, index) => ({
+                name: dim, type: 'bar', data: materials.map(m => m.values[index]), itemStyle: { color: materials[0].colors[index] } 
+              }))
+            };
+          }
+        }
 
-      // 【核心技巧】第二个参数传 true，意思是彻底清除旧图表，画全新的一张，防止折线图和柱状图混乱重叠！
-      this.analysisChart.setOption(option, true);
+        this.analysisChart.hideLoading();
+        this.analysisChart.setOption(option, true);
+
+      } catch (error) {
+        console.error(`渲染图表 ${tabName} 失败：`, error);
+        this.analysisChart.hideLoading();
+      }
     },
- // ================= 时间轴魔法控制 =================
-    // 动作 1：手动选中或自动切换到某个朝代
+
     selectDynasty(index) {
-      
       this.currentDynastyIndex = index;
-      
-      // 拿到当前选中的朝代对象（比如 { name: '清朝', short: 'qing' }）
       const selectedDynasty = this.dynasties[index];
-      
-      // 🌟 动态更新左下角面板的标题
       this.currentPanelTitle = selectedDynasty.name + '数据';
+      this.currentDynastyName = selectedDynasty.name;
       
-      // 在控制台打印一下，假装我们正在请求数据
-      console.log(`📡 正在向后端请求【${selectedDynasty.name}】的数据... 传递参数: ?dynasty=${selectedDynasty.short}`);
+      this.initRadarChart();
+      this.initStatsChart();
       
-      // ----------------------------------------------------
-      // ⚠️ 等你的后端队友把接口写好后，你只需要在这里加上这几行：
-      // this.fetchLevelData(selectedDynasty.short);
-      // this.fetchMapData(selectedDynasty.short);
-      // this.fetchRadarData(selectedDynasty.short);
-      // ----------------------------------------------------
       this.updateAllCharts(selectedDynasty.name);
     },
 
-    // 动作 2：点击自动播放按钮
     toggleAutoPlay() {
-      this.isPlaying = !this.isPlaying; // 切换播放/暂停状态
-      
+      this.isPlaying = !this.isPlaying;
       if (this.isPlaying) {
-        // 如果开启播放，设定闹钟，每 2 秒切一次（稍微改慢点，给图表留出动画时间）
         this.timer = setInterval(() => {
           const nextIndex = (this.currentDynastyIndex + 1) % this.dynasties.length;
-          // 🌟 核心魔法：直接调用上面的 selectDynasty 函数！
-          // 这样无论是手动点，还是自动播，都会触发标题变化和数据刷新！
           this.selectDynasty(nextIndex); 
-        }, 2000); 
+        }, 3000); 
       } else {
-        // 如果暂停，砸掉闹钟
         clearInterval(this.timer);
         this.timer = null;
       }
+    },
+
+    async fetchColorLevels() {
+      try {
+        const res = await request.get('/api/dashboard/color-levels');
+        if (res.code === 200) {
+          this.colorLevels = res.data.colorLevels;
+        }
+      } catch (error) {}
+    },
+
+    switchTab(tabName) {
+      this.currentTab = tabName;
+      this.renderChartByTab(tabName);
     }
-}
+  }
 }
 </script>
 
 <style scoped>
-/* ================= 左側卡片1：等級列表 ================= */
-.level-list { display: flex; flex-direction: column; gap: 15px; margin-top: 10px; }
-.level-item { display: flex; align-items: center; gap: 15px; }
-/* 圓形序號數字 */
-.level-rank { 
-  width: 26px; height: 26px; border-radius: 50%; color: white; 
-  display: flex; align-items: center; justify-content: center; 
-  font-size: 13px; font-weight: bold; flex-shrink: 0; 
-}
-.level-info { flex: 1; }
-.level-name-val { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; font-weight: bold; color: #333; }
-.level-val { color: #888; font-weight: normal; }
-/* 純 CSS 進度條的底部灰色槽 */
-.progress-bg { width: 100%; height: 6px; background-color: #f0f0f0; border-radius: 3px; overflow: hidden; }
-/* 進度條的彩色填充部分 */
-.progress-bar { height: 100%; border-radius: 3px; transition: width 1s ease-in-out; }
-
-/* ================= 左側卡片2：核心色彩 ================= */
-.color-grid { 
-  display: grid; grid-template-columns: 1fr 1fr; /* 切割成兩列 */
-  gap: 15px; margin-bottom: 20px; 
-}
-/* 四個大字方塊 */
-/* ================= 核心色彩卡片排版 ================= */
-.color-blocks {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 核心魔法：强行分成左右两等份的网格 */
-  gap: 12px; /* 两个方块之间的间距 */
-  margin-bottom: 20px; /* 和底部标签隔开一点距离 */
-}
-
-.color-box {
-  height: 70px; /* 控制方块的胖瘦，你可以自己微调 */
-  background-color: #ffffff;
-  border: 1px solid #f0f0f0; /* 极淡的边框 */
-  border-radius: 10px; /* 圆角，跟你原图一样 */
-  display: flex;
-  justify-content: center; /* 字居中 */
-  align-items: center;     /* 字垂直居中 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02); /* 微微的悬浮阴影，增加质感 */
-}
-
-/* 底部标签的排版 */
-.tags-container {
-  display: flex;
-  justify-content: center; /* 标签整体居中 */
-  flex-wrap: wrap; /* 如果标签太多装不下，自动换行 */
-  gap: 10px; /* 标签之间的间距 */
-}
-
-/* 如果你原来的标签样式丢失了，可以顺便补上这个 */
-.tag {
-  padding: 4px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  font-size: 12px;
-  color: #666;
-  background-color: #fff;
-}
-.tag-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-/* 圓角藥丸標籤 */
-.tag { padding: 5px 15px; border: 1px solid #ddd; border-radius: 20px; font-size: 13px; color: #666; background: white; }
-
-/* ================= 左側卡片3：清朝數據 ================= */
-.data-list { display: flex; flex-direction: column; gap: 12px; }
-.data-item { 
-  display: flex; justify-content: space-between; padding: 12px 18px; 
-  background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #555;
-}
-.data-item strong { font-size: 18px; }
-
+/* ================= 全局：深邃宫殿与科技光感 ================= */
 .dashboard-wrapper {
-  /* 给整个页面加一点内边距，并且设置一个高级的浅灰色背景 */
   padding: 30px;
-  background-color: #f5f7fa; 
+  /* 魔法：暗海蓝色渐变 + 墙面斑驳纹理 */
+  background-color: #03050a;
+  background-image: 
+    url('https://www.transparenttextures.com/patterns/stucco.png'),
+    linear-gradient(135deg, #0a1128 0%, #03050a 100%);
   min-height: 100vh;
+  color: #fdf6e3; /* 全局文字改为米黄色 */
 }
 
-.top-dashboard {
-  display: flex; /* 开启弹性盒子布局 */
-  justify-content: space-between; /* 让左中右三个栏目均匀分布 */
-  gap: 20px; /* 栏目之间的缝隙 */
-  margin-bottom: 30px; /* 和下半部分留出距离 */
+/* ================= 通用的卡片衣服 (暗金排版) ================= */
+.card {
+  /* 卡片内部用更亮的暗蓝色宣纸 */
+  background: url('https://www.transparenttextures.com/patterns/rice-paper-2.png') rgba(20, 5, 5, 0.4); 
+  border-radius: 4px; /* 摒弃现代大圆角 */
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* 加深阴影 */
+  border: 1px solid #bfa175; /* 暗金边框 */
+  position: relative;
+  backdrop-filter: blur(4px);
 }
 
-/* 定义左中右的宽度比例 */
+/* 卡片内部的双层绢丝线框 */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid rgba(220, 191, 162, 0.2);
+  pointer-events: none;
+}
+
+/* 卡片和图表标题：沉稳的暗金楷体 */
+.card-title, .map-title, .analysis-title {
+  font-size: 18px;
+  color: #e6c280;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-weight: bold;
+  font-family: "STKaiti", "楷体", serif;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+.map-title { text-align: center; margin-top: 10px; margin-bottom: 20px; font-size: 22px; }
+.analysis-title { text-align: center; font-size: 20px; margin-bottom: 20px; }
+
+/* ================= 顶部三列布局 ================= */
+.top-dashboard { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
 .left-column { width: 25%; display: flex; flex-direction: column; gap: 20px; }
 .center-column { width: 50%; display: flex; }
 .right-column { width: 25%; display: flex; flex-direction: column; gap: 20px; }
 
-/* ================= 通用的卡片衣服 ================= */
-.card {
-  background-color: #ffffff; /* 纯白背景 */
-  border-radius: 12px; 
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* 淡淡的阴影，让卡片浮起来 */
-  border: 1px solid #ebeef5; /* 极细的边框 */
-}
-
-.card-title {
-  font-size: 16px;
-  color: #333;
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-weight: bold;
-}
-
-/* ================= 给每个小盒子定高度 ================= */
+/* 规定高度 */
 .level-card { min-height: 250px; height: auto; }
 .core-color-card { min-height: 200px; height: auto; }
 .qing-data-card { min-height: 150px; height: auto; }
-
-.map-card { 
-  width: 100%; 
-  min-height: 640px; 
-  display: flex; 
-  flex-direction: column; 
-}
-.map-title { text-align: center; color: #333; margin-top: 10; margin-bottom: 20px; }
-/* ================= 🌟 国赛合规地图水印样式 ================= */
-.map-copyright {
-  position: absolute;
-  bottom: 15px;      /* 距离地图容器底部 15px */
-  right: 20px;       /* 距离右侧边界 20px */
-  font-size: 12px;
-  color: rgba(150, 150, 150, 0.8); /* 优雅的浅灰色，不抢地图风头 */
-  pointer-events: none; /* 绝对核心！让鼠标能穿过这行字，保证地图仍然能拖拽、缩放 */
-  z-index: 999;      /* 确保它在最顶层，不被图表遮挡 */
-}
+.map-card { width: 100%; min-height: 640px; display: flex; flex-direction: column; }
 .radar-card { flex: 1; min-height: 300px; }
 .stats-card { flex: 1; min-height: 320px; }
 
-/* ================= 下半部分：综合分析区 ================= */
-.analysis-card {
-  min-height: 500px;
-}
-.analysis-title {
-  text-align: center;
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-.analysis-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-.analysis-tabs button {
-  padding: 8px 24px;
-  border: 1px solid #ddd;
-  background-color: white;
-  border-radius: 20px;
-  cursor: pointer;
-  color: #666;
-  transition: 0.3s;
-}
-.analysis-tabs button.active {
-  background-color: #ff5e00; /* 选中状态的橙色 */
-  color: white;
-  border-color: #ff5e00;
-}
+/* ================= 左側卡片1：等級列表 ================= */
+.level-list { display: flex; flex-direction: column; gap: 15px; margin-top: 10px; }
+.level-item { display: flex; align-items: center; gap: 15px; }
+.level-rank { width: 26px; height: 26px; border-radius: 50%; color: #03050a; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; flex-shrink: 0; }
+.level-info { flex: 1; }
+.level-name-val { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; font-weight: bold; color: #fdf6e3; }
+.level-val { color: #bfa175; font-weight: normal; }
+.progress-bg { width: 100%; height: 6px; background-color: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 3px; transition: width 1s ease-in-out; }
 
-/* ================= 占位符的样式 (灰色提示字) ================= */
-/* ================= 综合分析区样式补充 ================= */
-.analysis-card {
-  min-height: 550px;
-  display: flex;
-  flex-direction: column;
+/* ================= 左側卡片2：核心色彩 ================= */
+.color-blocks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+.color-box {
+  height: 70px;
+  background-color: rgba(0,0,0,0.5); /* 半透明黑底 */
+  border: 1px solid rgba(220, 191, 162, 0.3); /* 暗金边框 */
+  border-radius: 4px;
+  display: flex; justify-content: center; align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
-.analysis-title {
-  text-align: center; font-size: 20px; margin-bottom: 20px; color: #333;
+.tags-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.tag { padding: 4px 12px; border: 1px solid rgba(220, 191, 162, 0.4); border-radius: 4px; font-size: 12px; color: #e6c280; background-color: rgba(0,0,0,0.5); }
+
+/* ================= 左側卡片3：朝代數據 ================= */
+.data-list { display: flex; flex-direction: column; gap: 12px; }
+.data-item { 
+  display: flex; justify-content: space-between; padding: 12px 18px; 
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(220, 191, 162, 0.2);
+  border-radius: 4px; font-size: 14px; color: #fdf6e3;
 }
-.analysis-tabs {
-  display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;
-}
+.data-item strong { font-size: 18px; text-shadow: 0 0 5px rgba(255,255,255,0.2); }
+
+/* ================= 下半部分：综合分析区 ================= */
+.analysis-card { min-height: 550px; display: flex; flex-direction: column; }
+.analysis-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
 .analysis-tabs button {
-  padding: 8px 24px; border: 1px solid #ddd; background-color: white; 
-  border-radius: 20px; cursor: pointer; color: #666; transition: all 0.3s;
-  font-size: 14px;
+  padding: 8px 24px; border: 1px solid rgba(220, 191, 162, 0.4); background-color: rgba(0,0,0,0.5); 
+  border-radius: 4px; cursor: pointer; color: #bfa175; transition: all 0.3s; font-size: 14px;
 }
-/* 点击后的高亮状态：橙色底，白字 */
-.analysis-tabs button.active {
-  background-color: #ff5e00; color: white; border-color: #ff5e00; font-weight: bold;
-}
-.big-chart-container {
-  flex: 1; /* 让图表占据中间大部分空间 */
-}
-/* 底部的数据说明框样式 */
-.data-description {
-  margin-top: 20px;
-  padding: 15px 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  color: #555;
-  font-size: 14px;
-  line-height: 1.6;
-}
-.data-description strong {
-  color: #333;
-  display: block;
-  margin-bottom: 5px;
-}
-.placeholder-text {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  color: #999;
-  background-color: #f9f9f9;
-  border: 2px dashed #ddd; 
-  border-radius: 8px;
-  text-align: center;
-  padding: 20px;
-}
-.map-placeholder { flex: 1; font-size: 18px; }
-.big-chart-placeholder { height: 350px; font-size: 18px; }
+.analysis-tabs button.active { background-color: #e6c280; color: #03050a; border-color: #e6c280; font-weight: bold; box-shadow: 0 0 10px rgba(230, 194, 128, 0.4); }
+.big-chart-container { flex: 1; }
+.data-description { margin-top: 20px; padding: 15px 20px; background-color: rgba(0,0,0,0.4); border: 1px solid rgba(220, 191, 162, 0.2); border-radius: 4px; color: #ccc; font-size: 14px; line-height: 1.6; }
+.data-description strong { color: #e6c280; display: block; margin-bottom: 5px; }
+
 /* ================= 底部：朝代时间轴专属衣服 ================= */
 .timeline-section {
-  background-color: #1a202c; /* 深邃的藏青/黑色背景 */
-  border-radius: 12px;
-  padding: 30px 40px;
-  margin-bottom: 20px; /* 和上面的图表拉开距离 */
-  color: white;
+  background: rgba(0,0,0,0.3); border: 1px dashed #bfa175; 
+  border-radius: 4px; padding: 30px 40px; margin-bottom: 20px; color: white;
 }
-.timeline-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
-}
-.timeline-header h3 { margin: 0; font-size: 20px; letter-spacing: 1px; }
-
-/* 播放按钮样式 */
+.timeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.timeline-header h3 { margin: 0; font-size: 20px; letter-spacing: 1px; color: #e6c280; font-family: "STKaiti", "楷体", serif;}
 .autoplay-btn {
-  background-color: #ff5e00; color: white; border: none; border-radius: 20px;
+  background-color: transparent; color: #e6c280; border: 1px solid #e6c280; border-radius: 4px;
   padding: 8px 24px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s;
 }
-.autoplay-btn.playing { background-color: #e53e3e; } /* 播放时变成红色警示 */
+.autoplay-btn.playing { background-color: #982a22; border-color: #982a22; color: #fff; }
 
-/* 轨道区排版 */
-.timeline-track {
-  position: relative; display: flex; justify-content: space-between; align-items: flex-start;
-  padding: 0 20px; margin-bottom: 40px;
-}
-/* 贯穿的一条细线 */
-.track-line {
-  position: absolute; top: 25px; left: 40px; right: 40px; height: 2px;
-  background-color: rgba(255, 255, 255, 0.2); z-index: 1;
-}
+.timeline-track { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 20px; margin-bottom: 40px; }
+.track-line { position: absolute; top: 25px; left: 40px; right: 40px; height: 2px; background-color: rgba(230, 194, 128, 0.2); z-index: 1; }
+.dynasty-node { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 80px; }
 
-/* 单个节点 */
-.dynasty-node {
-  position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
-  cursor: pointer; width: 80px;
-}
-/* 颜色圆圈 */
+/* 时间节点圆圈 */
 .node-circle {
   width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
   font-size: 20px; font-weight: bold; color: white; margin-bottom: 15px;
-  border: 3px solid #1a202c; /* 用和背景一样的边框，在视觉上切断背景线 */
-  transition: all 0.3s ease;
+  border: 2px solid #bfa175; background-color: #03050a; transition: all 0.3s ease;
 }
-/* 选中时的圆圈放大发光特效！ */
 .node-circle.active {
   transform: scale(1.2); 
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); border-color: white;
+  box-shadow: 0 0 20px rgba(255, 187, 0, 0.6); border-color: #e6c280; color: #e6c280;
 }
-
-/* 文字信息 */
 .node-text { text-align: center; }
-.d-name { font-size: 14px; color: rgba(255, 255, 255, 0.6); margin-bottom: 4px; transition: 0.3s; }
-.d-name.active { color: white; font-weight: bold; font-size: 16px; }
+.d-name { font-size: 14px; color: rgba(230, 194, 128, 0.5); margin-bottom: 4px; transition: 0.3s; font-family: "STKaiti", "楷体", serif; }
+.d-name.active { color: #e6c280; font-weight: bold; font-size: 18px; text-shadow: 0 0 10px rgba(230, 194, 128, 0.5); }
 .d-time { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
+.d-dot { width: 6px; height: 6px; background-color: #e6c280; border-radius: 50%; margin: 10px auto 0; box-shadow: 0 0 5px #e6c280;}
 
-/* 选中小白点 */
-.d-dot {
-  width: 6px; height: 6px; background-color: white; border-radius: 50%;
-  margin: 10px auto 0;
-}
+.current-status { text-align: center; font-size: 16px; letter-spacing: 1px; color: #bfa175; }
+.current-status span { font-size: 20px; margin-left: 5px; transition: color 0.3s; text-shadow: 0 0 10px currentColor; }
+.map-copyright { position: absolute; bottom: 15px; right: 20px; font-size: 12px; color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 999; }
 
-/* 底部状态 */
-.current-status { text-align: center; font-size: 16px; letter-spacing: 1px; }
-.current-status span { font-size: 18px; margin-left: 5px; transition: color 0.3s; }
+/* 手机端适配 */
 @media (max-width: 768px) {
-  .top-dashboard {
-    flex-direction: column !important; /* 左中右三列变一列 */
-  }
-
-  .left-column, .center-column, .right-column {
-    width: 100% !important; /* 每一栏都占满宽度 */
-  }
-
-  .timeline-track {
-    overflow-x: auto; /* 时间轴太长了，允许横向滑动 */
-    justify-content: flex-start !important;
-    padding-bottom: 20px;
-  }
-
-  .dynasty-node {
-    flex-shrink: 0; /* 防止时间轴节点被挤扁 */
-    width: 100px !important;
-  }
+  .top-dashboard { flex-direction: column !important; }
+  .left-column, .center-column, .right-column { width: 100% !important; }
+  .timeline-track { overflow-x: auto; justify-content: flex-start !important; padding-bottom: 20px; }
+  .dynasty-node { flex-shrink: 0; width: 100px !important; }
 }
 </style>

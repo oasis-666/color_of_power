@@ -42,12 +42,12 @@
         <h3 class="card-title">{{ currentBuilding.name }}</h3>
         
         <div class="sketch-box">
-  <img 
-    :src="buildingsData[activeBuildingKey].image" 
-    :alt="buildingsData[activeBuildingKey].name" 
-    style="width: 90%; height: 90%; object-fit: contain;"
-  />
-</div>
+          <img 
+            :src="buildingsData[activeBuildingKey].image" 
+            :alt="buildingsData[activeBuildingKey].name" 
+            style="width: 90%; height: 90%; object-fit: contain;"
+          />
+        </div>
 
         <div class="mini-summary-box">
           <div class="summary-title">{{ currentPart.name }}</div>
@@ -64,7 +64,7 @@
       </div>
 
       <div class="col-right card">
-        <h3 class="card-title">部位色彩数据</h3>
+        <h3 class="card-title">部位色彩与规制</h3>
         
         <div class="part-list">
           <div 
@@ -74,46 +74,29 @@
             :class="{ active: activePartIndex === index }"
             @click="activePartIndex = index"
           >
-            <div class="part-name">{{ part.name }}</div>
-            <div class="part-req">{{ part.requirement }}</div>
-            <div class="part-colors">
+            <div class="part-header">
+              <span class="part-name">{{ part.name }}</span>
+              <span class="part-req-tag">{{ part.requirement }}</span>
+            </div>
+            
+            <div class="part-detail-colors" v-if="activePartIndex === index">
+              <div class="color-pill" v-for="color in part.colors" :key="color.hex">
+                <span class="dot" :style="{ backgroundColor: color.hex }"></span>
+                {{ color.fullName }}
+              </div>
+            </div>
+
+            <div class="part-colors-mini" v-else>
               <div class="color-block" v-for="color in part.colors" :key="color.hex" :style="{ backgroundColor: color.hex }"></div>
             </div>
           </div>
         </div>
       </div>
 
-    </div>
-
-    <div class="bottom-panel card">
-      <h3 class="panel-title">建筑部位选择器</h3>
-      
-      <div class="part-tabs">
-        <button 
-          v-for="(part, index) in currentBuilding.parts" 
-          :key="index"
-          :class="{ active: activePartIndex === index }"
-          @click="activePartIndex = index"
-        >
-          <strong>{{ part.name }}</strong>
-          <span>{{ part.requirement }}</span>
-        </button>
-      </div>
-
-      <div class="part-detail-box">
-        <div class="detail-header">
-          <span class="detail-name">{{ currentPart.name }} - 颜色等级规则</span>
-        </div>
-        <div class="detail-content">
-          <div class="req-text">等级要求：<strong>{{ currentPart.requirement }}</strong></div>
-          <div class="allow-text">允许颜色数：<strong>{{ currentPart.colors.length }}种</strong></div>
-        </div>
-        <div class="detail-colors">
-          <div class="color-pill" v-for="color in currentPart.colors" :key="color.hex">
-            <span class="dot" :style="{ backgroundColor: color.hex }"></span>
-            {{ color.fullName }}
-          </div>
-        </div>
+    </div> <div class="bottom-history card">
+      <h3 class="panel-title">🏛️ 史料考证与规制解析</h3>
+      <div class="history-content">
+        <p class="ancient-text">{{ currentBuilding.historyDesc }}</p>
       </div>
     </div>
 
@@ -125,19 +108,18 @@ export default {
   name: 'SpecialCase',
   data() {
     return {
-      // 1. 记住当前选中的建筑和部位
-      activeBuildingKey: 'taihe', // 默认选中太和殿
-      activePartIndex: 0,         // 默认选中第一个部位（比如屋顶）
+      activeBuildingKey: 'taihe', 
+      activePartIndex: 0,         
 
       buildingsData: {
         taihe: {
           name: '太和殿',
-          // 注意：这里换成了美工给的彩色图路径，请确保文件名和你存的一致
           image: '/svg-buildings/taihedian.svg', 
           level: '皇家最高等级宫殿', 
           year: '明永乐十八年 (1420年)',
           colorFeatures: '明黄屋顶，朱红墙柱，檐下青绿点缀',
           ruleText: '该建筑的色彩使用需经皇帝批准，任何僭越使用将被视为谋逆之罪。',
+          historyDesc: '《大清会典》卷七十三载：“凡宫殿之制，太和殿、中和殿、保定殿皆覆以黄琉璃瓦，重檐庑殿顶。柱用赤色，檐下施和玺彩画。”太和殿作为皇权之极，其纯黄、纯红的使用，是封建礼制中“垄断性”色彩的最高体现。',
           parts: [
             { name: '屋顶', requirement: '皇家专用', colors: [{ name: '黄', fullName: '明黄琉璃瓦', hex: '#EBA53D' }] },
             { name: '墙体立柱', requirement: '皇家专用', colors: [{ name: '红', fullName: '朱红墙柱', hex: '#982A22' }] },
@@ -152,6 +134,7 @@ export default {
           year: '清雍正八年 (1730年)',
           colorFeatures: '青灰底色，深灰大门，两侧朱红明柱点缀',
           ruleText: '地方高级官员建筑严格遵循《大清会典》，以青灰为主，严禁大面积使用黄、朱红等皇家色彩。',
+          historyDesc: '《清史稿》舆服志规定：“一品至三品官署，厅堂可覆筒瓦，脊用兽吻；门柱许用黑油或青灰，严禁越级使用朱红及明黄。”直隶总督虽为封疆大吏，但其治所仍需恪守臣子本分，故以青灰砖瓦为主，仅在局部点缀暗红以示威严。',
           parts: [
             { name: '屋顶', requirement: '官员通用', colors: [{ name: '深灰', fullName: '深灰瓦片', hex: '#4D4D4D' }] },
             { name: '建筑主体', requirement: '官员通用', colors: [{ name: '浅灰', fullName: '青灰石墙', hex: '#B3B3B3' }] },
@@ -166,6 +149,7 @@ export default {
           year: '明永乐十八年 (1420年)',
           colorFeatures: '深蓝琉璃瓦，鎏金宝顶，朱红底座',
           ruleText: '祭天建筑使用独特的蓝色琉璃瓦，象征“天”，这是超越普通皇宫黄瓦的特殊礼制色彩。',
+          historyDesc: '天坛乃祭天之所，其色尚蓝。古人云：“敬天法祖，色取穹苍。”祈年殿三重檐皆覆深蓝琉璃瓦，以象皇天。这种色彩规制超越了凡间的“黄红”皇权体系，代表了古代帝王以“天子”身份与宇宙对话的独特神权色彩体系。',
           parts: [
             { name: '三层屋顶', requirement: '象征天空', colors: [{ name: '深蓝', fullName: '深蓝琉璃瓦', hex: '#202A5A' }] },
             { name: '鎏金宝顶', requirement: '最高神权', colors: [{ name: '金', fullName: '鎏金宝顶', hex: '#E2B854' }] },
@@ -177,11 +161,9 @@ export default {
     }
   },
   computed: {
-    // 魔法计算器：自动根据 activeBuildingKey 提取出当前的建筑数据
     currentBuilding() {
       return this.buildingsData[this.activeBuildingKey];
     },
-    // 魔法计算器：自动根据 activePartIndex 提取出当前的部位数据
     currentPart() {
       return this.currentBuilding.parts[this.activePartIndex];
     }
@@ -189,119 +171,157 @@ export default {
   methods: {
     switchBuilding(key) {
       this.activeBuildingKey = key;
-      this.activePartIndex = 0; // 切换建筑时，默认把部位重置回第一个
+      this.activePartIndex = 0; 
     }
   }
 }
 </script>
 
 <style scoped>
-/* ================= 页面基础与顶部 ================= */
-.special-case-wrapper { padding: 40px; background-color: #f0f2f5; min-height: 100vh; }
-.page-title { text-align: center; color: white; font-size: 24px; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
-.building-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-.building-tabs button { padding: 10px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; background: white; color: #666; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.building-tabs button.active { background: #ff5e00; color: white; }
+/* ================= 1. 全局：宣纸底色，无缝衔接 ================= */
+.special-case-wrapper { 
+  padding: 40px; 
+  /* 继承项目的米黄宣纸底色，去掉原来的死板灰色 */
+  background: transparent; 
+  min-height: 100vh; 
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
 
-/* ================= 通用卡片 ================= */
-.card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-.card-title { text-align: center; font-size: 18px; margin-top: 0; margin-bottom: 25px; color: #333; }
+/* 书法质感大标题 */
+.page-title { 
+  text-align: center; 
+  color: #3a080a; /* 极深的暗红/黑檀色 */
+  font-size: 32px; 
+  margin-bottom: 30px; 
+  font-family: "STXingkai", "华文行楷", "STKaiti", "楷体", serif;
+  letter-spacing: 4px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1); 
+}
 
-/* ================= 中间三列布局 ================= */
+/* ================= 2. 顶部导航栏：木牌印章质感 ================= */
+.building-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; position: relative; z-index: 2;}
+.building-tabs button { 
+  padding: 10px 30px; 
+  background: rgba(253, 246, 227, 0.6); 
+  border: 1px solid #c8a682; /* 暗金边框 */
+  border-radius: 4px; /* 古风方正圆角 */
+  font-size: 16px; font-weight: bold; 
+  color: #5c3a21; /* 檀褐色 */
+  font-family: "STKaiti", "楷体", serif; letter-spacing: 2px;
+  cursor: pointer; transition: 0.3s; 
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+}
+/* 选中时变成“朱砂红” */
+.building-tabs button.active { 
+  background: #982a22; 
+  color: #fdf6e3; 
+  border-color: #982a22;
+  box-shadow: 0 4px 10px rgba(152, 42, 34, 0.3); 
+}
+
+/* ================= 3. 通用卡片：绢丝装裱质感 ================= */
+.card { 
+  background: url('https://www.transparenttextures.com/patterns/rice-paper-2.png') #fffcf9; 
+  border-radius: 4px; 
+  padding: 25px; 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04); 
+  border: 1px solid #dcbfa2; 
+  position: relative;
+}
+/* 内层绢丝线框 */
+.card::before {
+  content: ''; position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid rgba(220, 191, 162, 0.4); pointer-events: none;
+}
+.card-title { 
+  text-align: center; font-size: 20px; margin-top: 0; margin-bottom: 25px; 
+  color: #5c3a21; font-family: "STKaiti", "楷体", serif; font-weight: bold; letter-spacing: 2px;
+}
+
+/* ================= 4. 三列布局 ================= */
 .content-layout { display: flex; gap: 20px; margin-bottom: 20px; }
 .col-left { flex: 1; }
 .col-middle { flex: 1.5; display: flex; flex-direction: column; align-items: center; position: relative; }
 .col-right { flex: 1; }
 
-/* 左侧信息 */
+/* --- 左侧：典籍批注面板 --- */
 .info-item { margin-bottom: 20px; }
-.info-label { font-size: 13px; color: #ff5e00; font-weight: bold; margin-bottom: 5px; }
-.info-value { font-size: 15px; color: #333; background: #f9f9f9; padding: 10px; border-radius: 6px; }
-.rule-box { border-left: 4px solid #ff5e00; padding-left: 15px; margin-top: 30px; background: #fff8f5; padding: 15px; border-radius: 0 8px 8px 0; }
-.rule-title { color: #d32f2f; font-weight: bold; font-size: 14px; margin-bottom: 5px; }
-.rule-text { font-size: 13px; color: #666; line-height: 1.6; }
+.info-label { font-size: 14px; color: #982a22; font-family: "STKaiti", serif; font-weight: bold; margin-bottom: 5px; }
+.info-value { 
+  font-size: 15px; color: #333; 
+  background: rgba(220, 191, 162, 0.15); /* 淡淡的缃色底 */
+  padding: 10px 12px; border-radius: 4px; border: 1px solid rgba(220, 191, 162, 0.3);
+}
+.rule-box { 
+  border-left: 4px solid #982a22; /* 皇家红警示线 */
+  margin-top: 30px; background: #fff8f5; padding: 15px; border-radius: 0 4px 4px 0; 
+}
+.rule-title { color: #982a22; font-weight: bold; font-family: "STKaiti", serif; font-size: 15px; margin-bottom: 5px; }
+.rule-text { font-size: 13px; color: #555; line-height: 1.6; }
 
-
-/* 中间简笔画 */
-.sketch-box { width: 100%; height: 300px; border: none; border-radius: 12px; display: flex; justify-content: center; align-items: center; background: #ffffff; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); }.placeholder-img { color: #999; font-size: 14px; }
-.mini-summary-box { border: 2px solid #ff5e00; border-radius: 8px; padding: 15px 30px; text-align: center; background: white; width: 60%; }
-.summary-title { font-size: 18px; font-weight: bold; color: #ff5e00; margin-bottom: 5px; }
+/* --- 中间：建筑线稿展示框 --- */
+.sketch-box { 
+  width: 100%; height: 300px; 
+  display: flex; justify-content: center; align-items: center; 
+  /* 去掉死白的底色，让图片融进背景宣纸里 */
+  background: transparent; margin-bottom: 20px; 
+}
+.mini-summary-box { 
+  border: 2px solid #982a22; border-radius: 4px; padding: 15px 30px; 
+  text-align: center; background: #fffcf9; width: 60%; position: relative; z-index: 2;
+  box-shadow: 0 4px 10px rgba(152, 42, 34, 0.1);
+}
+.summary-title { font-size: 18px; font-weight: bold; color: #982a22; margin-bottom: 5px; font-family: "STKaiti", serif;}
 .summary-desc { font-size: 13px; color: #666; margin-bottom: 15px; }
 .color-dots { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
-.dot { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 12px; border: 1px solid #ddd; }
+.dot { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 12px; border: 1px solid rgba(0,0,0,0.2); }
 
-/* 右侧部位列表 */
+/* --- 右侧：折叠卷宗（手风琴列表） --- */
 .part-list { display: flex; flex-direction: column; gap: 15px; }
-.part-card { border: 1px solid #ebeef5; border-radius: 8px; padding: 15px; cursor: pointer; transition: 0.3s; }
-.part-card:hover { border-color: #ffbb00; }
-.part-card.active { border: 2px solid #ff5e00; background-color: #fff8f5; }
-.part-name { font-weight: bold; color: #333; font-size: 15px; margin-bottom: 5px; }
-.part-req { font-size: 12px; color: #666; margin-bottom: 10px; }
-.part-colors { display: flex; gap: 8px; }
-.color-block { width: 20px; height: 20px; border-radius: 4px; border: 1px solid #ddd; }
-
-/* ================= 底部面板 ================= */
-.bottom-panel { display: flex; flex-direction: column; align-items: center; }
-.panel-title { font-size: 16px; margin-bottom: 20px; color: #333; }
-.part-tabs { display: flex; gap: 15px; margin-bottom: 20px; width: 100%; justify-content: center; }
-.part-tabs button { flex: 1; max-width: 200px; display: flex; flex-direction: column; align-items: center; padding: 15px; border: 1px solid #ebeef5; background: white; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-.part-tabs button strong { font-size: 16px; color: #333; margin-bottom: 5px; }
-.part-tabs button span { font-size: 12px; color: #999; }
-.part-tabs button.active { background: #ff5e00; border-color: #ff5e00; }
-.part-tabs button.active strong, .part-tabs button.active span { color: white; }
-
-/* 详细规则框 */
-.part-detail-box { width: 100%; border: 1px solid #7cb5ec; border-radius: 8px; padding: 20px; background: #f2f8fe; }
-.detail-header { font-weight: bold; color: #3169b2; margin-bottom: 15px; font-size: 16px; }
-.detail-content { display: flex; gap: 40px; font-size: 14px; color: #555; margin-bottom: 15px; }
-.detail-colors { display: flex; gap: 20px; }
-.color-pill { display: flex; align-items: center; gap: 8px; background: white; padding: 5px 15px; border-radius: 20px; border: 1px solid #ddd; font-size: 14px; }
-/* 手机端专用样式 */
-@media (max-width: 768px) {
-  .container {
-    padding: 20px;
-    flex-direction: column; /* 如果你用了 flex，让它们上下排列 */
-  }
-
-  /* 针对你截图中重叠的文字 */
-  .title-vertical {
-    font-size: 2rem; /* 缩小那个巨大的垂直标题 */
-    margin-bottom: 10px;
-  }
-
-  .subtitle-horizontal {
-    position: static; /* 取消绝对定位，让它乖乖排在下面，不再重叠 */
-    font-size: 1.2rem;
-    text-align: center;
-  }
-
-  .button-group {
-    display: flex;
-    flex-wrap: wrap; /* 让按钮在空间不够时自动换行 */
-    justify-content: center;
-    gap: 10px;
-  }
+.part-card { 
+  border: 1px solid #dcbfa2; border-radius: 4px; padding: 15px; cursor: pointer; transition: 0.3s; 
+  background: rgba(255,255,255,0.5);
 }
+.part-card:hover { border-color: #982a22; background: #fffcf9; }
+.part-card.active { border: 2px solid #982a22; background-color: #fff8f5; box-shadow: 0 2px 8px rgba(152, 42, 34, 0.1);}
+
+.part-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.part-name { font-weight: bold; color: #333; font-size: 16px; font-family: "STKaiti", serif;}
+.part-req-tag { 
+  font-size: 12px; background: rgba(220, 191, 162, 0.2); padding: 2px 8px; border-radius: 4px; 
+  color: #5c3a21; border: 1px solid #dcbfa2;
+}
+.part-card.active .part-req-tag { background: #982a22; color: white; border-color: #982a22; }
+
+.part-colors-mini { display: flex; gap: 8px; margin-top: 10px; }
+.color-block { width: 20px; height: 20px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.2); box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
+
+.part-detail-colors { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dcbfa2; }
+.color-pill { display: flex; align-items: center; gap: 8px; background: white; padding: 5px 10px; border-radius: 4px; border: 1px solid #dcbfa2; font-size: 13px; color: #333; }
+.color-pill .dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; border: 1px solid #ccc; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
+
+/* ================= 5. 底部：史料考证卡片 (厚重古籍风) ================= */
+.bottom-history { 
+  margin-top: 10px; 
+  background: url('https://www.transparenttextures.com/patterns/rice-paper-2.png') #fffaf5; 
+  border: 6px double #5c3a21; /* 双层厚重边框 */
+  border-radius: 4px;
+}
+.panel-title { 
+  font-size: 20px; color: #5c3a21; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; 
+  font-family: "STKaiti", "楷体", serif; font-weight: bold;
+}
+.history-content { padding: 15px 20px; }
+.ancient-text { 
+  font-family: "STKaiti", "楷体", serif; font-size: 18px; line-height: 1.8; 
+  color: #333; text-indent: 2em; letter-spacing: 1.5px; 
+}
+
+/* ================= 手机端适配 ================= */
 @media (max-width: 768px) {
-  .content-layout {
-    flex-direction: column !important; /* 三列信息变垂直排列 */
-  }
-
-  .building-tabs {
-    flex-wrap: wrap;
-  }
-
-  .building-tabs button {
-    padding: 8px 15px !important;
-    font-size: 14px !important;
-  }
-
-  .mini-summary-box {
-    width: 90% !important; /* 解释框占满 */
-  }
-
-  .part-tabs {
-    flex-wrap: wrap; /* 底部部位选择器自动换行 */
-  }
+  .content-layout { flex-direction: column !important; }
+  .building-tabs { flex-wrap: wrap; }
+  .building-tabs button { padding: 8px 15px !important; font-size: 14px !important; }
+  .mini-summary-box { width: 90% !important; }
 }
 </style>

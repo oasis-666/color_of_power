@@ -172,47 +172,118 @@ mounted() {
   to { opacity: 0.4; transform: scale(1); }
 }
 /* 样式部分保持原样，无需修改 */
-body { margin: 0; padding: 0; font-family: "PingFang SC", sans-serif; }
-.hero-section { width: 100vw; height: 100vh; background: linear-gradient(to right, #ff5e00, #ffb347); position: relative; }
-/* 替换原来的 .vertical-title */
+/* ================= 🌟 首页：紫禁宫墙与暗金主题 ================= */
+body { margin: 0; padding: 0; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background-color: #080a10;}
+
+.hero-section { 
+  width: 100vw; 
+  height: 100vh; 
+  /* 魔法：宫墙暗红色渐变 + 墙面斑驳纹理 */
+  background-color: #611316;
+  background-image: 
+    url('https://www.transparenttextures.com/patterns/stucco.png'),
+    linear-gradient(135deg, #7a1518 0%, #3a080a 100%);
+  position: relative; 
+  overflow: hidden;
+}
+
+/* 增加一个隐约的建筑底纹（利用 radial-gradient 模拟光源聚焦） */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
+}
+
+/* 左侧大标题：暗金浮雕效果 */
 .vertical-title { 
   position: absolute; 
-  left: 5%; 
-  top: 10%; 
-  
-  /* 🌟 1. 字体魔法：优先调用系统自带的行楷/楷体/宋体，瞬间拉满古风感 */
+  left: 8%; 
+  top: 15%; 
   font-family: "STXingkai", "华文行楷", "STKaiti", "楷体", "SimSun", serif;
-  font-size: 72px; /* 艺术字一般稍微放大一点更好看 */
+  font-size: 80px; 
   font-weight: bold; 
   writing-mode: vertical-lr; 
   letter-spacing: 24px; 
-  
-  /* 🌟 2. 颜色与立体感魔法：纯白底色 + 多层阴影挤出“白玉浮雕”的厚度 */
-  color: #ffffff; 
+  color: #e6c280; /* 宫廷暗金 */
+  /* 精致的内发光与外阴影，去掉原本显脏的灰色阴影 */
   text-shadow: 
-    1px 1px 0px #e0e0e0,
-    2px 2px 0px #cccccc,
-    3px 3px 0px #b3b3b3,
-    4px 4px 0px #999999,
-    6px 6px 10px rgba(0, 0, 0, 0.4); 
-}.center-content { position: absolute; top: 35%; width: 100%; text-align: center; color: white; }
-.center-content h2 { 
-  font-family: "STKaiti", "楷体", "SimSun", serif; /* 副标题用端正的楷体 */
-  font-size: 32px; 
-  letter-spacing: 4px; 
-  margin-bottom: 15px; 
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-}.center-content p { font-size: 14px; opacity: 0.8; }
-.bottom-tabs { position: absolute; bottom: 10%; width: 100%; display: flex; justify-content: center; gap: 20px; }
-.tab-btn { padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; background-color: rgba(255, 255, 255, 0.2); color: white; transition: all 0.3s ease; }
-.tab-btn.active { background-color: white; color: #ff5e00; }
-.tab-btn:hover { background-color: rgba(255, 255, 255, 0.4); }
-
-.content-section {
-  min-height: 100vh; 
-  background-color: #f0f2f5;
+    -1px -1px 1px rgba(255, 255, 255, 0.2),
+    2px 2px 4px rgba(0, 0, 0, 0.8),
+    0px 0px 20px rgba(230, 194, 128, 0.3);
 }
 
+/* 中间副标题：端正素雅 */
+.center-content { 
+  position: absolute; 
+  top: 40%; 
+  width: 100%; 
+  text-align: center; 
+  color: #fdf6e3; 
+}
+.center-content h2 { 
+  font-family: "STKaiti", "楷体", "SimSun", serif;
+  font-size: 36px; 
+  letter-spacing: 6px; 
+  margin-bottom: 15px; 
+  text-shadow: 2px 4px 8px rgba(0,0,0,0.6);
+}
+.center-content p { 
+  font-size: 14px; 
+  letter-spacing: 2px;
+  color: #bfa175; 
+  font-family: "Georgia", serif; /* 英文用更古典的衬线体 */
+}
+
+/* 底部导航：宫廷牌匾质感 */
+.bottom-tabs { 
+  position: absolute; 
+  bottom: 12%; 
+  width: 100%; 
+  display: flex; 
+  justify-content: center; 
+  gap: 30px; 
+}
+.tab-btn { 
+  padding: 12px 35px; 
+  background-color: rgba(20, 5, 5, 0.4); 
+  border: 1px solid #bfa175; /* 暗金边框 */
+  border-radius: 4px; /* 摒弃现代大圆角 */
+  font-size: 18px; 
+  font-family: "STKaiti", "楷体", serif;
+  letter-spacing: 2px;
+  color: #e6c280; 
+  cursor: pointer; 
+  transition: all 0.4s ease; 
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.tab-btn.active { 
+  background-color: #e6c280; 
+  color: #3a080a; 
+  box-shadow: 0 0 20px rgba(230, 194, 128, 0.4);
+  font-weight: bold;
+}
+.tab-btn:hover:not(.active) { 
+  background-color: rgba(230, 194, 128, 0.15); 
+  transform: translateY(-3px);
+}
+
+/* 内容区底色同步加深一点，防止突兀 */
+.content-section {
+  min-height: 100vh; 
+  background-color: #fdf6e3; /* 纸质背景 */
+}
+
+/* 手机端适配保持结构 */
+@media (max-width: 768px) {
+  .hero-section { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; height: auto; min-height: 100vh; }
+  .vertical-title { position: static !important; writing-mode: horizontal-tb !important; font-size: 40px !important; letter-spacing: 5px !important; margin-bottom: 20px; }
+  .center-content { position: static !important; margin-bottom: 40px; }
+  .bottom-tabs { position: static !important; flex-wrap: wrap; gap: 10px !important; }
+  .tab-btn { padding: 10px 15px !important; font-size: 14px !important; width: 80%; }
+}
 @media (max-width: 768px) {
   .hero-section {
     display: flex;
