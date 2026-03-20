@@ -5,7 +5,7 @@ const cacheMap = new Map();
 
 export const request = axios.create({
   baseURL: '', 
-  timeout: 10000 
+  timeout: 30000 
 });
 
 request.interceptors.request.use(

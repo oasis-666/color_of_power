@@ -231,13 +231,35 @@ export default {
   methods: {
    async politePreload() {
       console.log("🛠️ 开始后台排队预加载全量历史数据...");
+
+      // 💡 架构师级修复 1：把底部四个耗时的全局数据接口加入“静默预加载 VIP 队列”
+      const bottomApis = [
+        '/api/dashboard/dynasty-comparison',
+        '/api/dashboard/history-trend', // 这个就是之前疯狂超时的罪魁祸首
+        '/api/dashboard/region-rank-dist',
+        '/api/dashboard/material-analysis'
+      ];
+      
+      // 先偷偷加载这四个大图表的数据
+      for (const api of bottomApis) {
+        try {
+          // request.js 拦截器会自动把请求结果塞进 cacheMap 缓存里
+          await request.get(api);
+        } catch (e) {
+          console.warn(`⚠️ 预加载 ${api} 失败或超时，用户点击时将重新请求`, e);
+        }
+        // 🌟 重点缓冲：每请求完一个大接口，让前端休息 0.8 秒，绝不把后端服务器压垮！
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+      console.log("✅ 底部四大综合图表静默备货完成！");
+
+      // --- 下面是你原本预加载各个朝代的代码，保持原样 ---
       for (let i = 1; i < this.dynasties.length; i++) {
-        // 等待这个朝代的数据请求完毕
         await this.preloadDynastyData(this.dynasties[i].name);
-        // 🌟 重点：每次请求完，让前端休息 0.5 秒，放过你们的后端服务器！
+        // 这里也休息 0.5 秒
         await new Promise(resolve => setTimeout(resolve, 500));
       }
-      console.log("🎉 所有朝代已备货完毕，现在可以开启自动播放了！");
+      console.log("🎉 所有朝代及综合档案已备货完毕，现在可以开启自动播放了！");
     },
 
     // 🌟 修改原来的预加载方法，返回 Promise 让上面能 await
@@ -381,24 +403,51 @@ export default {
           
           // 💡 修复点 1：开启单选模式，允许区域被点击后保持状态
           selectedMode: 'single', 
+          
 
-          label: { 
-            show: !isMobile, 
-            color: 'rgba(253, 246, 227, 0.85)', 
-            fontSize: 10,
+         label: {
+            show: !isMobile,
+            color: 'rgba(253, 246, 227, 0.85)',
+            fontSize: 11, // 💡 字体稍微调大了一点点，因为字数少了
             // 💡 修复点 2：文本美颜滤镜！拦截超长地名，进行极简处理
             formatter: function(params) {
               let name = params.name;
-              
+
               // 💡 评委拍板：太挤了，直接返回空字符串，让它们在视觉上隐身！
-              if (name === '香港特别行政区' || name === '澳门特别行政区' || name === '香港' || name === '澳门') {
-                return ''; 
+              // 这里新增了 '北京市', '天津市', '上海市'
+              if (name === '香港特别行政区' || name === '澳门特别行政区' || name === '香港' || name === '澳门' ) {
+                return '';
               }
-              
-              // 顺手精简其他冗长名字
-              name = name.replace('维吾尔自治区', '').replace('回族自治区', '').replace('壮族自治区', '').replace('自治区', '');
+
+              // 💡 顺手精简其他冗长名字（这里新增了去掉“省”和“市”）
+              name = name.replace('维吾尔自治区', '')
+                         .replace('回族自治区', '')
+                         .replace('壮族自治区', '')
+                         .replace('自治区', '')
+                         .replace('省', '')
+                         .replace('市', '');
               return name;
             }
+          },
+          labelLayout: function (params) {
+            // 注意：因为咱们上一步的 formatter 已经把“省”字去掉了，所以这里匹配 '甘肃'
+            if (params.text === '甘肃') {
+              return { 
+                dx: 19, // 横向偏移：正数向右，负数向左
+                dy: -10  // 纵向偏移：正数向下，负数向上
+              }; 
+            }
+            if (params.text === '内蒙古') {
+              return { dx: -15, dy: 20 };
+            }
+            // 陕西也可以往右边拉一点，避开宁夏
+            if (params.text === '陕西') {
+              return { dx: 5, dy: 5 };
+            }
+            if (params.text === '河北') {
+              return { dx: -10, dy:13 };
+            }
+            return {}; // 其他省份保持原样
           },
           itemStyle: { 
             areaColor: '#10182b', 
@@ -406,6 +455,7 @@ export default {
             borderWidth: 1,
             shadowColor: 'rgba(0,0,0,0.5)', shadowBlur: 10 
           },
+          
           // 悬浮（Hover）状态
           emphasis: { 
             focus: 'none', 
