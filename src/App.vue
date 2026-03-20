@@ -321,20 +321,89 @@ body { margin: 0; padding: 0; font-family: "PingFang SC", "Microsoft YaHei", san
   }
 }
 /* ================= 🌟 开场动画屏样式 ================= */
+/* ================= 🌟 开场动画屏样式 (大漆暗金版) ================= */
 .intro-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-/* 替换原来的 background-color */
-background: radial-gradient(circle at center, #161b26 0%, #080a10 100%);
-  z-index: 9999; /* 保证它盖住所有东西 */
+  
+  /* 💡 爆改1：大漆质感背景！极深的暗绛红渐变 + 宣纸/斑驳底纹 */
+  background-color: #1a0808; 
+  background-image: 
+    url('https://www.transparenttextures.com/patterns/stucco.png'),
+    radial-gradient(circle at center, #2b1110 0%, #0d0404 100%);
+    
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #e6c280; /* 极具古典质感的暗金色 */
+  color: #e6c280; 
   cursor: pointer;
+  /* 增加一个极其微弱的全屏内阴影，增加幽暗的氛围 */
+  box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
+}
+
+/* 竖排文字容器 */
+.poetry-container {
+  writing-mode: vertical-rl; 
+  font-family: "STKaiti", "楷体", "SimSun", serif;
+  letter-spacing: 12px; /* 字距稍微拉开一点，更透气 */
+  position: relative;
+  z-index: 10; /* 确保文字在纹样之上 */
+}
+
+/* 诗词逐句浮现动画 */
+.poetry-line {
+  font-size: 38px; /* 稍微放大一丢丢 */
+  margin: 0 20px;
+  opacity: 0;
+  color: #e6c280;
+  /* 💡 爆改2：文字鎏金效果，微弱的发光感 */
+  text-shadow: 0 0 20px rgba(230, 194, 128, 0.4), 0 2px 4px rgba(0,0,0,0.8);
+  animation: fadeIn 2s forwards; 
+}
+
+.poetry-line:nth-child(2) {
+  animation-delay: 1s;
+}
+
+/* 出处落款 */
+.poetry-author {
+  font-size: 22px;
+  margin-right: 60px;
+  margin-top: 50px;
+  color: #a38254; /* 颜色调暗金一点，不要用纯灰 */
+  opacity: 0;
+  animation: fadeIn 2s forwards 2.5s;
+}
+
+/* 底部呼吸提示 */
+.skip-hint {
+  position: absolute;
+  bottom: 40px;
+  font-size: 14px;
+  color: #888;
+  letter-spacing: 6px;
+  animation: breathe 3s ease-in-out infinite; /* 呼吸放缓，显得更从容 */
+}
+
+/* 💡 爆改3：纹样融进背景 */
+@keyframes fadeOrnament {
+  from { opacity: 0; transform: scale(0.95); }
+  /* 透明度从 0.4 降到 0.15，它应该是氛围，不是主角 */
+  to { opacity: 0.15; transform: scale(1); }
+}
+
+.ornament-img {
+  width: 90vh;
+  height: 90vh;
+  position: absolute; 
+  top: 0;
+  /* 让它变成偏金色的单色调，并和底色做色彩增殖叠加 */
+  filter: sepia(1) hue-rotate(350deg) saturate(2) brightness(0.6); 
+  mix-blend-mode: hard-light; 
 }
 
 /* 竖排文字容器 */

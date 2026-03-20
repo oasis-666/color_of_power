@@ -200,21 +200,61 @@ export default {
     this.initRadarChart();
     this.initStatsChart();
     this.initMapChart();
-    this.fetchColorLevels();
+    
     this.initAnalysisChart();
     
     // 页面加载自动触发一次唐朝数据
     this.selectDynasty(0);
     
+    setTimeout(() => {
+      this.politePreload();
+    }, 2000);
+
     window.addEventListener('resize', () => {
       if(this.radarChart) this.radarChart.resize();
       if(this.statsChart) this.statsChart.resize();
-      if(this.mapChart) this.mapChart.resize();
       if(this.analysisChart) this.analysisChart.resize();
+      
+      if(this.mapChart) {
+        // 实时检测宽度
+        const isMobile = window.innerWidth <= 768;
+        // 动态更新地图的 label 设置
+        this.mapChart.setOption({
+          series: [{ label: { show: !isMobile } }]
+        });
+        // 重绘适应尺寸
+        this.mapChart.resize();
+      }
     });
   },
 
   methods: {
+   async politePreload() {
+      console.log("🛠️ 开始后台排队预加载全量历史数据...");
+      for (let i = 1; i < this.dynasties.length; i++) {
+        // 等待这个朝代的数据请求完毕
+        await this.preloadDynastyData(this.dynasties[i].name);
+        // 🌟 重点：每次请求完，让前端休息 0.5 秒，放过你们的后端服务器！
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      console.log("🎉 所有朝代已备货完毕，现在可以开启自动播放了！");
+    },
+
+    // 🌟 修改原来的预加载方法，返回 Promise 让上面能 await
+    preloadDynastyData(dynastyName) {
+      const dynastyMap = { '唐朝': 'tang', '宋朝': 'song', '元朝': 'yuan', '明朝': 'ming', '清朝': 'qing' };
+      const dynastyKey = dynastyMap[dynastyName] || 'qing';
+      
+      return Promise.all([
+        request.get('/api/dashboard/dynasty-stats', { params: { dynasty: dynastyKey } }),
+        request.get('/api/dashboard/level-stats', { params: { dynasty: dynastyKey } }),
+        request.get('/api/dashboard/core-colors', { params: { dynasty: dynastyKey } }),
+        request.get('/api/dashboard/color-analysis', { params: { dynasty: dynastyKey } }),
+        request.get('/api/dashboard/map-distribution', { params: { dynasty: dynastyKey } })
+      ]).then(() => {
+        console.log(`✅ 后台静默备货完成: ${dynastyName}`);
+      }).catch(e => console.warn(`⚠️ ${dynastyName} 预加载失败，可能是网络波动`, e));
+    },
     getCurrentDynastyColors() {
       const selected = this.dynasties[this.currentDynastyIndex];
       return selected.mainColor ? [selected.mainColor, selected.accentColor] : ['#3169b2', '#00cccc']; 
@@ -306,6 +346,10 @@ export default {
     async initMapChart() {
       const chartDom = this.$refs.mapBox;
       if (!chartDom) return;
+      
+      // 💡 核心逻辑：获取当前屏幕宽度，判断是否为手机端
+      const isMobile = window.innerWidth <= 768;
+
       if (!this.mapChart) {
         this.mapChart = echarts.init(chartDom);
         this.mapChart.showLoading({ text: '正在召唤中国版图...', color: '#e6c280', maskColor: 'rgba(0,0,0,0.5)' });
@@ -330,17 +374,53 @@ export default {
           inRange: { color: ['#3a080a', '#982A22', '#ffbb00'] } 
         },
         series: [{
-          name: '中国地图', type: 'map', map: 'china', roam: false, zoom: 1.1,
-          label: { show: true, color: 'rgba(253, 246, 227, 0.6)', fontSize: 10 },
+          name: '中国地图', type: 'map', map: 'china', 
+          roam: false, 
+          zoom: 1.25, 
+          top: '15%', 
+          
+          // 💡 修复点 1：开启单选模式，允许区域被点击后保持状态
+          selectedMode: 'single', 
+
+          label: { 
+            show: !isMobile, 
+            color: 'rgba(253, 246, 227, 0.85)', 
+            fontSize: 10,
+            // 💡 修复点 2：文本美颜滤镜！拦截超长地名，进行极简处理
+            formatter: function(params) {
+              let name = params.name;
+              
+              // 💡 评委拍板：太挤了，直接返回空字符串，让它们在视觉上隐身！
+              if (name === '香港特别行政区' || name === '澳门特别行政区' || name === '香港' || name === '澳门') {
+                return ''; 
+              }
+              
+              // 顺手精简其他冗长名字
+              name = name.replace('维吾尔自治区', '').replace('回族自治区', '').replace('壮族自治区', '').replace('自治区', '');
+              return name;
+            }
+          },
           itemStyle: { 
             areaColor: '#10182b', 
             borderColor: 'rgba(230, 194, 128, 0.3)',
             borderWidth: 1,
             shadowColor: 'rgba(0,0,0,0.5)', shadowBlur: 10 
           },
+          // 悬浮（Hover）状态
           emphasis: { 
-            label: { color: '#fff', fontWeight: 'bold' }, 
+            focus: 'none', 
+            label: { color: '#fff', fontWeight: 'bold', fontSize: 13 }, 
             itemStyle: { areaColor: '#982A22', borderColor: '#ffbb00', shadowBlur: 20, shadowColor: '#ffbb00' } 
+          },
+          
+          // 💡 修复点 3：增加点击选中（Select）状态，并把刚才悬浮发光的特效直接“复制粘贴”过来
+          select: {
+            label: { color: '#fff', fontWeight: 'bold', fontSize: 13 }, 
+            itemStyle: { areaColor: '#982A22', borderColor: '#ffbb00', shadowBlur: 20, shadowColor: '#ffbb00' } 
+          },
+
+          blur: {
+            label: { color: 'rgba(253, 246, 227, 0.85)' }
           },
           data: [] 
         }]
@@ -687,10 +767,49 @@ export default {
 .map-copyright { position: absolute; bottom: 15px; right: 20px; font-size: 12px; color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 999; }
 
 /* 手机端适配 */
+/* ================= 手机端适配 ================= */
 @media (max-width: 768px) {
   .top-dashboard { flex-direction: column !important; }
   .left-column, .center-column, .right-column { width: 100% !important; }
-  .timeline-track { overflow-x: auto; justify-content: flex-start !important; padding-bottom: 20px; }
-  .dynasty-node { flex-shrink: 0; width: 100px !important; }
+  
+  /* 💡 修复1：给外层卡片“瘦身”，缩小左右内边距，把空间还给时间轴 */
+  .timeline-section { padding: 20px 10px !important; }
+
+  /* 💡 修复2：头部标题和自动播放按钮在手机端改为上下排列，避免拥挤 */
+  .timeline-header { flex-direction: column; gap: 15px; margin-bottom: 25px; }
+
+  /* 💡 修复3：开启容器的丝滑横向滚动 */
+  .timeline-track { 
+    overflow-x: auto; 
+    overflow-y: hidden;
+    justify-content: flex-start !important; 
+    
+    /* 💡 修复1：给顶部增加 20px 的空间，专门留给放大和发光的特效 */
+    padding-top: 20px; 
+    
+    padding-bottom: 15px; 
+    -webkit-overflow-scrolling: touch; 
+  }
+
+  /* 💡 修复4：定制一条古典暗金色的专属手机端滚动条，暗示用户可以左右滑动 */
+  .timeline-track::-webkit-scrollbar { height: 4px; }
+  .timeline-track::-webkit-scrollbar-thumb { 
+    background: rgba(230, 194, 128, 0.4); 
+    border-radius: 4px; 
+  }
+
+  /* 锁定每个朝代节点的宽度 */
+  .dynasty-node { flex-shrink: 0; width: 90px !important; }
+
+  /* 💡 修复5：彻底修复断掉的贯穿线！
+     取消 right 的限制，改为根据节点数量算出固定宽度 (唐宋元明清共4个间隔 * 90px) */
+  .track-line {
+    /* 💡 修复2：因为父元素顶部多了 20px，线也要跟着下移！原本是 top: 25px，现在改成 45px */
+    top: 45px !important; 
+    
+    left: 45px !important; 
+    right: auto !important; 
+    width: 360px !important; 
+  }
 }
 </style>
