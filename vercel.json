@@ -3,14 +3,6 @@
     {
       "source": "/api/:path*",
       "destination": "http://server.hairuosky.cn:1111/api/:path*"
-    },
-    {
-      "source": "/data/:path*",
-      "destination": "http://server.hairuosky.cn:1111/data/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }

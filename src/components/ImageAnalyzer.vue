@@ -183,7 +183,7 @@ export default {
 
       try {
         // 请求后端接口，带上 enable_ai=true
-        const response = await request.post('http://server.hairuosky.cn:1111/api/analyze?enable_ai=true', formData, {
+        const response = await request.post('/api/analyze?enable_ai=true', formData, {
   headers: { 'Content-Type': 'multipart/form-data' }
 });
 
