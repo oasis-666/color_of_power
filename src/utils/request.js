@@ -1,21 +1,25 @@
 import axios from 'axios';
 
-// 建立记忆宫殿
+// 建立记忆宫殿 (LRU 缓存策略底层变量)
 const cacheMap = new Map();
+const MAX_CACHE_SIZE = 50; // 设定最大缓存接口数量，防止内存溢出
 
 export const request = axios.create({
-  baseURL: '', 
+  baseURL: '', // 配合 Vite proxy
   timeout: 30000 
 });
 
+// ================= 1. 请求拦截器 =================
 request.interceptors.request.use(
   config => {
-    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBQ0FTQl9BRE1JTiIsImlhdCI6MTc3MzY3Nzg3MiwiZXhwIjoxNzc2MjY5ODcyfQ.Jdaps3Oy_TQ5aFWcbgTv8tIDhlSjuaN1r_8KC7F7Dp8'; // 你的真实Token
+    // ⚠️ 暂且保留你的硬编码 Token 确保能运行，但加入了 localStorage 备用通道
+    const token = localStorage.getItem('auth_token') || 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBQ0FTQl9BRE1JTiIsImlhdCI6MTc3MzY3Nzg3MiwiZXhwIjoxNzc2MjY5ODcyfQ.Jdaps3Oy_TQ5aFWcbgTv8tIDhlSjuaN1r_8KC7F7Dp8'; 
+    
     if (token) config.headers['Authorization'] = `Bearer ${token}`;
 
     const cacheKey = `${config.url}_${JSON.stringify(config.params || {})}`;
     
-    // 🌟 如果缓存里有，直接返回（加入深拷贝，切断对象引用防止 Vue 乱套）
+    // 🌟 闪电读取缓存
     if (config.method === 'get' && cacheMap.has(cacheKey)) {
       console.log(`🚀 闪电读取缓存：${cacheKey}`);
       config.adapter = () => {
@@ -33,23 +37,31 @@ request.interceptors.request.use(
   error => Promise.reject(error)
 );
 
+// ================= 2. 响应拦截器 =================
 request.interceptors.response.use(
   response => {
     if (response.config.method === 'get' && response.data.code === 200) {
       
-      // 🌟 防御性编程：检查后端是不是被压垮了返回了空数组？
       const resData = response.data.data;
       let isDataEmpty = false;
+      
       if (resData) {
-        // 如果本该有数据的数组是空的，标记为异常
         if (resData.levels && resData.levels.length === 0) isDataEmpty = true;
         if (resData.colors && resData.colors.length === 0) isDataEmpty = true;
       }
 
-      // 只有数据真的饱满，我们才允许放入缓存！
+      // 只有数据饱满，才执行缓存逻辑
       if (!isDataEmpty) {
         const cacheKey = `${response.config.url}_${JSON.stringify(response.config.params || {})}`;
-        // 存为字符串，彻底切断引用
+        
+        // 💡 架构师级修复：LRU 缓存淘汰机制（写在这里才对！）
+        if (cacheMap.size >= MAX_CACHE_SIZE) {
+          const firstKey = cacheMap.keys().next().value; // 拿到最老的一个 key
+          cacheMap.delete(firstKey); // 把它踢出去
+          console.log(`🧹 内存清理：已淘汰旧缓存 ${firstKey}`);
+        }
+
+        // 存入新数据
         cacheMap.set(cacheKey, JSON.stringify(response.data)); 
       } else {
         console.warn('⚠️ 拦截到后端返回的空壳数据，拒绝存入缓存！');

@@ -390,9 +390,20 @@ export default {
   box-shadow: inset 0 0 20px rgba(0,0,0,0.03); /* 画框内阴影 */
 }
 .interactive-svg { width: 100%; height: auto; display: block; }
-.clickable-part { transition: all 0.3s; cursor: pointer; }
-.clickable-part:hover { fill: rgba(152, 42, 34, 0.1) !important; stroke: #982a22; stroke-width: 3;}
+.clickable-part { 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  cursor: pointer; 
+}
 
+/* 💡 修复：当鼠标悬停时，不仅仅是加深轮廓，还要根据当前是否选了颜色给出反馈 */
+.clickable-part:hover { 
+  /* 增加一个非常淡的宣纸黄底色作为通用的 Hover 态 */
+  fill: rgba(230, 194, 128, 0.2) !important; 
+  stroke: #982a22; 
+  stroke-width: 3;
+  /* 增加一点微弱的发光感，提升可点击的心理暗示 */
+  filter: drop-shadow(0px 0px 8px rgba(152, 42, 34, 0.4));
+}
 /* ================= 6. 进度条与提交按钮 ================= */
 .progress-container { width: 100%; max-width: 600px; position: relative; z-index: 2;}
 .progress-info { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: #555; }

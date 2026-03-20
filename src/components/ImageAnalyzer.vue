@@ -40,12 +40,12 @@
         :disabled="!selectedFile || isAnalyzing"
         @click="startAnalysis"
       >
-        {{ isAnalyzing ? '🚀 AI 深度解析中...' : '启动 AI 深度特征扫描' }}
+        {{ isAnalyzing ? ' AI 深度解析中...' : '启动 AI 深度特征扫描' }}
       </button>
     </div>
 
    <div class="result-dashboard" :class="{ 'is-empty': !analysisResult }">
-      
+  
   <div class="result-card ai-card">
     <div class="card-header">
       <span class="icon">🤖</span>
@@ -63,7 +63,9 @@
       <div class="info-item">
         <span class="label">建筑风格</span>
         <span class="value">
-          {{ analysisResult ? analysisResult.ai_analysis.architecture_style : '--' }}
+          {{ analysisResult && analysisResult.ai_analysis.architecture_style 
+             ? analysisResult.ai_analysis.architecture_style.join(' · ') 
+             : '--' }}
         </span>
       </div>
       
@@ -76,14 +78,18 @@
 
       <div class="info-item">
         <span class="label">结构特征</span>
-        <span class="value">
-          {{ analysisResult ? analysisResult.ai_analysis.structure_description : '--' }}
+        <span class="value" 
+              style="max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
+              :title="analysisResult ? analysisResult.ai_analysis.scene_description : ''">
+          {{ analysisResult ? analysisResult.ai_analysis.scene_description : '--' }}
         </span>
       </div>
 
       <div class="summary-box">
         <strong>诊断总结：</strong> 
-        {{ analysisResult ? analysisResult.ai_analyze : '请上传建筑影像并启动 AI 扫描，系统将自动输出深度诊断报告。' }}
+        {{ analysisResult && analysisResult.ai_analysis.reasoning 
+           ? analysisResult.ai_analysis.reasoning.join('') 
+           : '请上传建筑影像并启动 AI 扫描，系统将自动输出深度诊断报告。' }}
       </div>
     </div>
   </div>
@@ -95,11 +101,18 @@
     </div>
     <div class="info-list">
       
-      <div class="info-item">
+      <div class="info-item" style="align-items: flex-start;">
         <span class="label">核心色彩占比 (AI)</span>
-        <span class="value" style="color: #ff5e00; font-weight: bold;">
-          {{ analysisResult ? analysisResult.ai_analysis.color_ratio : '--' }}
-        </span>
+        <div class="value" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <template v-if="analysisResult && analysisResult.ai_analysis.building_color_distribution">
+            <span v-for="(colorObj, idx) in analysisResult.ai_analysis.building_color_distribution" 
+                  :key="idx" 
+                  :style="{ color: colorObj.hex, textShadow: '0 0 5px ' + colorObj.hex + '40' }">
+              {{ colorObj.color }} ({{ (colorObj.ratio * 100).toFixed(0) }}%)
+            </span>
+          </template>
+          <span v-else style="color: #ff5e00; font-weight: bold;">--</span>
+        </div>
       </div>
       
       <div class="info-item">
@@ -131,7 +144,7 @@
   
 </template>
 <script>
-import axios from 'axios';
+import { request } from '../utils/request.js';
 
 export default {
   data() {
@@ -170,17 +183,16 @@ export default {
 
       try {
         // 请求后端接口，带上 enable_ai=true
-        const response = await axios.post('http://server.hairuosky.cn:1111/api/analyze?enable_ai=true', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await request.post('http://server.hairuosky.cn:1111/api/analyze?enable_ai=true', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
 
-        if (response.data && response.data.success) {
-          // 把后端返回的数据存到变量里，Vue 会自动把它们显示在页面上！
-          this.analysisResult = response.data;
-          console.log("解析成功！", this.analysisResult);
-        } else {
-          alert("解析失败：" + response.data.message);
-        }
+        if (response && response.success) { // 直接取 response.success
+  this.analysisResult = response;   // 直接把 response 赋给结果
+  console.log("解析成功！", this.analysisResult);
+} else {
+  alert("解析失败：" + (response.message || "未知错误"));
+}
       } catch (error) {
         console.error("请求报错：", error);
         alert("网络请求失败，请检查后端服务是否开启！");
@@ -305,15 +317,35 @@ export default {
 
 /* ================= 4. 数据仪表盘：机密档案质感 ================= */
 .result-dashboard {
-  width: 100%; max-width: 1000px; margin-top: 40px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+  /* 如果需要在移动端自动堆叠卡片，可取消注释 */
+  /* flex-wrap: wrap; */
 }
+
+/* 通用结果卡片样式 */
 .result-card {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(230, 194, 128, 0.2);
-  border-radius: 4px; padding: 30px;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
-  position: relative;
+  flex: 1; /* 平分宽度 */
+  min-width: 320px; /* 设定最小宽度，防止在小屏幕挤得过扁 */
+  
+  /* 🎨 视觉美学 (对齐你原有的深红/宣纸黄主题) */
+  background: rgba(26, 8, 8, 0.9); /* 大漆化底色 */
+  border: 1px solid rgba(230, 194, 128, 0.2); /* 宣纸黄微光边框 */
+  border-radius: 8px;
+  padding: 20px;
+  
+  /* 🛠️ 布局微调 */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  
+  /* 💡 关键修复 1：去掉原先可能的 height: 100% 或固定高度 */
+  /* 改为高度自动，允许卡片随文本内容向下生长 */
+  height: auto !important; 
+  transition: all 0.3s ease;
 }
 /* AI 面板：科技青色发光 */
 .ai-card { border-top: 3px solid #40fcfc; background: linear-gradient(to bottom, rgba(64,252,252,0.05) 0%, transparent 50%); }
@@ -325,7 +357,13 @@ export default {
 .card-header h3 { font-size: 18px; color: #e6c280; margin: 0; font-family: "STKaiti", serif; letter-spacing: 1px; }
 .ai-card .card-header h3 { color: #40fcfc; } /* AI 专属色 */
 
-.info-list { display: flex; flex-direction: column; gap: 15px; }
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* 增加行间距，提升阅读感 */
+  width: 100%;
+  box-sizing: border-box;
+}
 .info-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
 .label { color: #bfa175; }
 .value { color: #fdf6e3; font-family: monospace; font-size: 15px; }
@@ -338,9 +376,28 @@ export default {
 
 /* 底部总结框：机密文件框 */
 .summary-box {
-  margin-top: 20px; padding: 15px;
-  background: rgba(0,0,0,0.5); border-left: 3px solid #40fcfc;
-  font-size: 13px; color: #ccc; line-height: 1.6; font-family: "STKaiti", serif;
+  margin-top: 20px; /* 与上方数据隔开距离 */
+  padding: 15px;
+  background: rgba(152, 42, 34, 0.15); /* 朱红色微弱底色 hint */
+  border-top: 1px solid rgba(230, 194, 128, 0.1);
+  border-radius: 4px;
+  
+  /* 🎨 文本美学 */
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  line-height: 1.8; /* 增加行高，提升大段文字的可读性 */
+  text-align: justify; /* 两端对齐，视觉更整洁 */
+  
+  /* 🌟🌟 强制换行的核心黑科技（务必精准应用） 🌟🌟 */
+  display: block !important; /* 确保是块级元素 */
+  white-space: normal !important; /* 👑 核心：取消所有 nowrap，允许标准文本换行 */
+  word-wrap: break-word !important; /* 兼容旧浏览器：允许单词内断行 */
+  overflow-wrap: break-word !important; /* 现代标准：允许在必要时断行，绝不溢出 */
+  
+  /* 辅助：限制自身宽度在父容器内，防溢出的双重保险 */
+  width: 100% !important; 
+  max-width: 100% !important; 
+  box-sizing: border-box !important; /* 包含 padding 在宽度计算内 */
 }
 </style>
 
